@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brown_primary">#7A4F37</color>
+    <color name="cream_background">#D9C3AC</color>
+    <color name="cream_light">#F2E9DE</color>
+    <color name="white">#FFFFFF</color>
+    <color name="text_dark">#3B2A1E</color>
+    <color name="text_muted">#8A7566</color>
+    <color name="error_red">#B3261E</color>
+    <color name="success_green">#3F7D4A</color>
+</resources>
