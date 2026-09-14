@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "645884110790",
+    "project_id": "foodsaver-a06eb",
+    "storage_bucket": "foodsaver-a06eb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645884110790:android:2b89d6fa11395fb8b374c7",
+        "android_client_info": {
+          "package_name": "com.example.food_saver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "645884110790-soo4f6aiek42rjc06finkj6160k6ne00.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.food_saver",
+            "certificate_hash": "9c9ac7c9e6ee798571e97d7daa6ee78e22a1d4a4"
+          }
+        },
+        {
+          "client_id": "645884110790-32lnq2205vnosourlf440vhf5vogp88r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPu9QPBLSX9NOMGFI0QPYbNHc8uRjprts"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "645884110790-32lnq2205vnosourlf440vhf5vogp88r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

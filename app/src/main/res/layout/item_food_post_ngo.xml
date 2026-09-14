@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_card"
+    android:padding="12dp"
+    android:layout_marginBottom="12dp"
+    android:elevation="2dp">
+
+    <ImageView
+        android:id="@+id/ivFoodImage"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:scaleType="centerCrop"
+        android:background="@color/soft_lavender"
+        android:contentDescription="Food image" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvFoodName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/charcoal"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            tools:text="Cooked Rice &amp; Chicken" />
+
+        <TextView
+            android:id="@+id/tvQuantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/gray_secondary"
+            android:textSize="13sp"
+            tools:text="Quantity: 10 kg" />
+
+        <TextView
+            android:id="@+id/tvPostedBy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/gray_secondary"
+            android:textSize="12sp"
+            tools:text="Posted by: Al-Khidmat Bakery" />
+
+        <TextView
+            android:id="@+id/tvDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/indigo_purple"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:visibility="gone"
+            tools:text="2.3 km away"
+            tools:visibility="visible" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvStatusChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="@drawable/bg_status_chip"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="4dp"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="@color/indigo_purple"
+        tools:text="Available" />
+
+</LinearLayout>
