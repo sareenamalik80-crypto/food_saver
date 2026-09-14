@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cream_background">
+
+    <View
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="-60dp"
+        android:layout_marginEnd="-60dp"
+        android:alpha="0.5"
+        android:background="@drawable/bg_circle_blob" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:contentDescription="Food Saver logo"
+                android:src="@drawable/ic_logo_mark" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:text="One Last Step"
+                android:textColor="@color/brown_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="24dp"
+                android:text="We just need a few more details to finish setting up your account"
+                android:textColor="@color/text_muted"
+                android:textSize="14sp" />
+
+            <!-- Signed in as (Google account, read-only) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:background="@color/cream_light"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Signed in as"
+                    android:textColor="@color/text_muted"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/tvGoogleName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/text_dark"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    tools:text="Fatima Bakery" />
+
+                <TextView
+                    android:id="@+id/tvGoogleEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_muted"
+                    android:textSize="13sp"
+                    tools:text="fatima@gmail.com" />
+            </LinearLayout>
+
+            <!-- Role selection -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="I am registering as"
+                android:textColor="@color/text_dark"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp" />
+
+            <RadioGroup
+                android:id="@+id/rgRole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <RadioButton
+                    android:id="@+id/rbDonor"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="Donor"
+                    android:buttonTint="@color/brown_primary"
+                    android:textColor="@color/text_dark" />
+
+                <RadioButton
+                    android:id="@+id/rbNgo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="NGO"
+                    android:buttonTint="@color/brown_primary"
+                    android:textColor="@color/text_dark" />
+            </RadioGroup>
+
+            <!-- Phone -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_pill_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="18dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="Phone"
+                    android:src="@drawable/ic_phone_field" />
+
+                <EditText
+                    android:id="@+id/etPhone"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Phone Number"
+                    android:importantForAutofill="no"
+                    android:inputType="phone"
+                    android:maxLines="1"
+                    android:textColor="@color/text_dark"
+                    android:textColorHint="@color/text_muted"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <!-- Address -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/bg_pill_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="18dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="Address"
+                    android:src="@drawable/ic_location_field" />
+
+                <EditText
+                    android:id="@+id/etAddress"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Address"
+                    android:importantForAutofill="no"
+                    android:maxLines="1"
+                    android:textColor="@color/text_dark"
+                    android:textColorHint="@color/text_muted"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <!-- Verification document -->
+            <TextView
+                android:id="@+id/tvDocumentLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Upload Food Authority Letter"
+                android:textColor="@color/text_dark"
+                android:textSize="14sp"
+                android:layout_marginBottom="6dp" />
+
+            <Button
+                android:id="@+id/btnUploadDocument"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/cream_light"
+                android:text="Choose Document"
+                android:textColor="@color/brown_primary" />
+
+            <TextView
+                android:id="@+id/tvDocumentStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Required — used by admin to verify your account"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp" />
+
+            <ImageView
+                android:id="@+id/ivDocumentPreview"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="centerInside"
+                android:visibility="gone"
+                android:background="@color/cream_light"
+                android:contentDescription="Selected verification document preview" />
+
+            <Button
+                android:id="@+id/btnComplete"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="@color/brown_primary"
+                android:text="Complete Sign Up"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminateTint="@color/brown_primary" />
+
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>
