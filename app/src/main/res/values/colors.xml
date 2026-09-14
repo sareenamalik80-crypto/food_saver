@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Reference palette — named exactly as in the design spec -->
+    <color name="indigo_purple">#4B3F72</color>   <!-- Primary -->
+    <color name="soft_lavender">#EBE6F7</color>   <!-- Secondary -->
+    <color name="peach_orange">#FFB27D</color>    <!-- Accent -->
+    <color name="off_white">#FAFAFC</color>       <!-- Background -->
+    <color name="charcoal">#2D2D2D</color>        <!-- Text -->
+    <color name="gray_secondary">#7A7A7A</color>  <!-- Secondary Text -->
+    <color name="green_status">#22C55E</color>    <!-- Status / Success -->
+
+    <!-- Existing variable names kept and re-mapped to the new palette, so
+         every layout already using @color/brown_primary, cream_background,
+         etc. picks up the new look automatically — no XML edits needed
+         anywhere else. -->
+    <color name="brown_primary">@color/indigo_purple</color>
+    <color name="cream_background">@color/off_white</color>
+    <color name="cream_light">@color/soft_lavender</color>
+    <color name="white">#FFFFFF</color>
+    <color name="text_dark">@color/charcoal</color>
+    <color name="text_muted">@color/gray_secondary</color>
+    <color name="error_red">#B3261E</color>
+    <color name="success_green">@color/green_status</color>
+
+    <!-- New accent for CTAs that should pop (e.g. "Confirm Received",
+         "Post Food" primary action) — matches the reference's orange accent. -->
+    <color name="accent_cta">@color/peach_orange</color>
+</resources>
