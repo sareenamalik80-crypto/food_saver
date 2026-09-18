@@ -14,6 +14,7 @@ import com.example.food_saver.admin.violations.PolicyViolationsActivity;
 import com.example.food_saver.databinding.ActivityAdminDashboardBinding;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class AdminDashboardActivity extends AppCompatActivity {
 
@@ -42,10 +43,17 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void setupHeader() {
-        String adminEmail = (FirebaseAuth.getInstance().getCurrentUser() != null)
-                ? FirebaseAuth.getInstance().getCurrentUser().getEmail()
-                : "Admin";
-        binding.tvWelcome.setText("Welcome, " + adminEmail);
+        binding.tvWelcome.setText("Welcome, Admin");
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid != null) {
+            FirebaseFirestore.getInstance().collection("users").document(uid).get()
+                    .addOnSuccessListener(doc -> {
+                        String name = doc.getString("name");
+                        if (name != null && !name.isEmpty()) {
+                            binding.tvWelcome.setText("Welcome, " + name);
+                        }
+                    });
+        }
 
         binding.btnProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, AdminProfileActivity.class)));
