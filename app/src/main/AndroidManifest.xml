@@ -4,6 +4,11 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.camera.any" android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -15,9 +20,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Food_saver">
 
-        <!-- App now starts on LoginActivity, not MainActivity -->
+        <!-- App starts on SplashActivity, which routes to LoginActivity.
+             LoginActivity then routes by role: Donor -> .donor.*, NGO -> .ngo.* -->
         <activity
-            android:name=".auth.LoginActivity"
+            android:name=".auth.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,19 +31,38 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".auth.SignUpActivity"
-            android:exported="false" />
+        <activity android:name=".auth.LoginActivity" android:exported="false" />
+        <activity android:name=".auth.SignUpActivity" android:exported="false" />
+        <activity android:name=".auth.CompleteGoogleProfileActivity" android:exported="false" />
+        <activity android:name=".auth.PendingVerificationActivity" android:exported="false" />
 
-        <activity
-            android:name=".auth.PendingVerificationActivity"
-            android:exported="false" />
+        <!-- Kept but unused now that Splash + Login handle app start. -->
+        <activity android:name=".MainActivity" android:exported="false" />
 
-        <!-- MainActivity kept, but no longer the launcher. Repurpose it later
-             (e.g. as the Donor/NGO home shell) or delete it if unused. -->
+        <!-- Donor module -->
+        <activity android:name=".donor.PostFoodActivity" android:exported="false" />
+        <activity android:name=".donor.DonorHomeActivity" android:exported="false" />
+        <activity android:name=".donor.MyDonationsActivity" android:exported="false" />
+        <activity android:name=".donor.NgoRequestsActivity" android:exported="false" />
         <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+            android:name=".donor.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".donor.ProfileActivity" android:exported="false" />
+        <activity android:name=".donor.EditFoodPostActivity" android:exported="false" />
+
+        <!-- NGO module -->
+        <activity android:name=".ngo.NgoDashboardActivity" android:exported="false" />
+        <activity android:name=".ngo.FoodDetailNgoActivity" android:exported="false" />
+        <activity android:name=".ngo.DeliveryDetailsActivity" android:exported="false" />
+        <activity
+            android:name=".ngo.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ngo.RateDonorActivity" android:exported="false" />
+        <activity android:name=".ngo.TransparencyDashboardActivity" android:exported="false" />
+        <activity android:name=".ngo.ProfileActivity" android:exported="false" />
+        <activity android:name=".ngo.MyCollectionsActivity" android:exported="false" />
 
     </application>
 

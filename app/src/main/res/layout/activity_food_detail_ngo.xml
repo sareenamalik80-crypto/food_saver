@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/off_white">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_header_purple"
+        android:padding="16dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_back_arrow"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="Food Detail"
+            android:src="@drawable/ic_stats"
+            app:tint="@color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Food Detail"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/ivFoodImage"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:scaleType="centerCrop"
+            android:background="@color/soft_lavender"
+            android:contentDescription="Food image" />
+
+        <TextView
+            android:id="@+id/tvStatusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_status_chip"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="5dp"
+            android:textStyle="bold"
+            android:textColor="@color/indigo_purple"
+            tools:text="Available" />
+
+        <TextView
+            android:id="@+id/tvFoodName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/charcoal"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            tools:text="Cooked Rice &amp; Chicken" />
+
+        <TextView
+            android:id="@+id/tvQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/gray_secondary"
+            tools:text="Quantity: 10 kg" />
+
+        <TextView
+            android:id="@+id/tvPostedBy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/gray_secondary"
+            tools:text="Posted by: Al-Khidmat Bakery" />
+
+        <TextView
+            android:id="@+id/tvDonorRating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/peach_orange"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            tools:text="⭐ 4.5 (12 ratings)" />
+
+        <TextView
+            android:id="@+id/tvPostedTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/gray_secondary"
+            android:textSize="13sp"
+            tools:text="Posted: 12 Sep, 4:30 PM" />
+
+        <TextView
+            android:id="@+id/tvExpiresIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/error_red"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            tools:text="Expires in: 3 hrs 20 min" />
+
+        <TextView
+            android:id="@+id/tvDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/charcoal"
+            tools:text="Freshly cooked, packed in trays, pickup available till 8 PM." />
+
+        <!-- Yeh button apna text/visibility Java code se status ke hisaab se
+             set karega: Request This Food / Pending Approval / Already Claimed /
+             Fill Delivery Details / Mark as Collected / Mark as Handed Over -->
+        <Button
+            android:id="@+id/btnPrimaryAction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_button_cta"
+            android:textColor="@color/charcoal"
+            android:textStyle="bold"
+            android:padding="14dp"
+            android:text="Request This Food" />
+
+        <!-- Shown only while this NGO's own request is still pending — lets
+             it change its mind before the donor responds. -->
+        <Button
+            android:id="@+id/btnCancelRequest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/error_red"
+            android:textColor="@color/white"
+            android:padding="14dp"
+            android:text="Cancel Request"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnOpenChat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/indigo_purple"
+            android:textColor="@color/white"
+            android:padding="14dp"
+            android:text="Open Chat"
+            android:visibility="gone" />
+
+        <!-- Dual-confirmation handover: this NGO's own confirmation button,
+             visible once approved and until this NGO has pressed it. -->
+        <Button
+            android:id="@+id/btnMarkReceived"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/peach_orange"
+            android:textColor="@color/charcoal"
+            android:textStyle="bold"
+            android:padding="14dp"
+            android:text="Mark as Received"
+            android:visibility="gone" />
+
+        <!-- Shows once this NGO has confirmed: either waiting on the donor,
+             or fully complete once both sides have confirmed. -->
+        <TextView
+            android:id="@+id/tvHandoverNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="You confirmed — waiting for the donor to confirm handover" />
+
+    </LinearLayout>
+    </ScrollView>
+</LinearLayout>
