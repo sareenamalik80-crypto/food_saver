@@ -61,8 +61,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             binding.tvMessageText.setText(message.getText());
             binding.tvTime.setText(
                     android.text.format.DateFormat.format("hh:mm a", message.getTimestamp()));
-
-            // Align the whole row left or right depending on who sent it.
             binding.rootContainer.setGravity(isMine ? Gravity.END : Gravity.START);
 
             int color = isMine ? R.color.brown_primary : R.color.cream_light;

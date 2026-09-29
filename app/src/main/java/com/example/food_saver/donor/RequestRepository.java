@@ -36,13 +36,6 @@ public class RequestRepository {
         firestore = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
     }
-
-    /**
-     * Real-time listener for every request made against the current donor's
-     * posts (any status), newest first. Each Request is enriched with the
-     * linked food post's name + photo (fetched via foodPostId) since the
-     * "requests" collection itself doesn't store those — see Request.java.
-     */
     public ListenerRegistration listenToRequestsForMe(RequestsListCallback callback) {
         if (auth.getCurrentUser() == null) {
             callback.onError("Not logged in.");
@@ -106,12 +99,6 @@ public class RequestRepository {
             callback.onUpdate(requests);
         });
     }
-
-    /**
-     * Approves a request: request.status -> "approved" (+ respondedAt), and
-     * the linked FoodPost.status -> "approved" too. Done as a transaction
-     * so both writes succeed or neither does.
-     */
     public void acceptRequest(String requestId, String foodPostId, ActionCallback callback) {
         DocumentReference requestRef = firestore.collection(REQUESTS_COLLECTION).document(requestId);
         DocumentReference postRef = firestore.collection(POSTS_COLLECTION).document(foodPostId);
@@ -126,12 +113,6 @@ public class RequestRepository {
                 }).addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
-
-    /**
-     * Rejects a request: request.status -> "rejected" (+ respondedAt), and
-     * the linked FoodPost reopens to "available" (clearing claimedByNgoId
-     * and claimedByNgoName) so other NGOs can request it again.
-     */
     public void rejectRequest(String requestId, String foodPostId, ActionCallback callback) {
         DocumentReference requestRef = firestore.collection(REQUESTS_COLLECTION).document(requestId);
         DocumentReference postRef = firestore.collection(POSTS_COLLECTION).document(foodPostId);
@@ -153,25 +134,6 @@ public class RequestRepository {
                 }).addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
-
-    /**
-     * Donor's half of the dual-confirmation handover.
-     *
-     * Sets donorConfirmedHandover = true on the request. If the NGO has
-     * ALREADY confirmed their side (ngoConfirmedReceived == true), this
-     * completes the handover: both the request and its linked FoodPost move
-     * to STATUS_HANDED_OVER. Otherwise the request just moves to
-     * STATUS_COLLECTED, meaning "one side has confirmed, waiting on the
-     * other" — the UI uses the two boolean flags (not just this status
-     * string) to know exactly whose confirmation is still pending.
-     *
-     * Runs as a transaction so two near-simultaneous confirmations (donor
-     * and NGO tapping their buttons at almost the same time) can't race
-     * each other into an inconsistent state.
-     *
-     * NGO module: implement the mirror image of this method — read
-     * "donorConfirmedHandover" instead, and write "ngoConfirmedReceived".
-     */
     public void markHandedOverByDonor(String requestId, String foodPostId, ActionCallback callback) {
         DocumentReference requestRef = firestore.collection(REQUESTS_COLLECTION).document(requestId);
         DocumentReference postRef = firestore.collection(POSTS_COLLECTION).document(foodPostId);

@@ -37,7 +37,7 @@ import java.util.Calendar;
  * Lets a donor take a LIVE photo (no gallery picker — CameraX only) of the
  * food, fill in details (including pickup location via GPS), and post it.
  * The photo is compressed and stored as a Base64 string directly in
- * Firestore (no Firebase Storage — that requires the paid Blaze plan).
+ * Firestore no Firebase Storage.
  */
 public class PostFoodActivity extends AppCompatActivity {
 
@@ -161,12 +161,6 @@ public class PostFoodActivity extends AppCompatActivity {
 
     private void capturePhoto() {
         if (imageCapture == null) return;
-
-        // Save to the app's own private cache dir instead of the public
-        // MediaStore gallery — the photo is only ever used internally
-        // (AI check + upload), never needs to appear in the user's gallery,
-        // and this sidesteps MediaStore write failures seen on some OEM
-        // ROMs (e.g. "Failed to write to MediaStore URI: null" on Huawei).
         java.io.File photoFile = new java.io.File(getCacheDir(),
                 "foodbridge_" + System.currentTimeMillis() + ".jpg");
 
@@ -248,9 +242,6 @@ public class PostFoodActivity extends AppCompatActivity {
         }
 
         setLoading(true);
-
-        // Compress off the main thread — decoding + JPEG compression can
-        // take a noticeable moment and would otherwise freeze the UI.
         Uri photoUri = capturedPhotoUri;
         long expiresAt = selectedExpiresAtMillis;
         double lat = pickupLat;
@@ -279,15 +270,11 @@ public class PostFoodActivity extends AppCompatActivity {
 
                     @Override
                     public void onCheckFailed(String message) {
-                        // Fail open — a network/API hiccup shouldn't block a
-                        // real donor from posting. Still show the error so
-                        // it's visible during testing/debugging instead of
-                        // silently disappearing.
+                        // Every photo must be verified — don't post silently
+                        // when the check couldn't run; let the donor retry.
                         runOnUiThread(() -> {
-                            Toast.makeText(PostFoodActivity.this,
-                                    "AI check failed (posting anyway): " + message, Toast.LENGTH_LONG).show();
-                            uploadPost(photoBase64, donorName, foodName, quantity,
-                                    description, expiresAt, pickupLocation, pickupWindow, lat, lng);
+                            setLoading(false);
+                            showCheckFailedDialog(message);
                         });
                     }
                 });
@@ -301,12 +288,18 @@ public class PostFoodActivity extends AppCompatActivity {
             }
         }).start();
     }
+    private void showCheckFailedDialog(String message) {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Couldn't verify photo")
+                .setMessage(message + "\n\nYour photo must be verified before posting. "
+                        + "Please check your internet connection and try again.")
+                .setCancelable(false)
+                .setPositiveButton("Try Again", (dialog, which) -> attemptSubmit())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
 
-    /**
-     * The AI check flagged something (not real food / looks AI-generated /
-     * looks like a screenshot). This is a heuristic, not proof, so the
-     * donor can either retake the photo or post anyway.
-     */
     private void showSuspiciousPhotoDialog(AiImageChecker.Result result, String photoBase64,
                                             String donorName, String foodName, String quantity,
                                             String description, long expiresAt, String pickupLocation,
@@ -335,12 +328,6 @@ public class PostFoodActivity extends AppCompatActivity {
                         donorName, foodName, quantity, description, expiresAt, pickupLocation, pickupWindow, lat, lng))
                 .show();
     }
-
-    /**
-     * Second, explicit confirmation before overriding an AI warning — makes
-     * clear that doing so gets reported to admin, rather than silently
-     * letting a tap on "Post Anyway" bypass the check.
-     */
     private void confirmPolicyOverride(AiImageChecker.Result result, String photoBase64,
                                         String donorName, String foodName, String quantity,
                                         String description, long expiresAt, String pickupLocation,

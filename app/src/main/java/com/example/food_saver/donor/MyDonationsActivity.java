@@ -1,5 +1,6 @@
 package com.example.food_saver.donor;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -37,11 +38,12 @@ public class MyDonationsActivity extends AppCompatActivity {
                 intent.putExtra(EditFoodPostActivity.EXTRA_FOOD_ID, post.getFoodId());
                 startActivity(intent);
             } else {
+                String state = post.isCompleted() ? "completed" : post.getStatus();
                 Toast.makeText(this,
-                        "Can't edit — this post is already " + post.getStatus() + ".",
+                        "Can't edit — this post is already " + state + ".",
                         Toast.LENGTH_SHORT).show();
             }
-        });
+        }, this::confirmDelete);
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.setAdapter(adapter);
@@ -75,5 +77,29 @@ public class MyDonationsActivity extends AppCompatActivity {
         if (postsListener != null) {
             postsListener.remove();
         }
+    }
+
+    private void confirmDelete(FoodPost post) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete this post?")
+                .setMessage("\"" + post.getFoodName() + "\" will be removed permanently. "
+                        + "This can't be undone.")
+                .setPositiveButton("Delete", (dialog, which) ->
+                        foodPostRepository.deleteFoodPost(post.getFoodId(),
+                                new FoodPostRepository.UploadCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Toast.makeText(MyDonationsActivity.this,
+                                                "Post deleted.", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onFailure(String errorMessage) {
+                                        Toast.makeText(MyDonationsActivity.this,
+                                                errorMessage, Toast.LENGTH_LONG).show();
+                                    }
+                                }))
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }

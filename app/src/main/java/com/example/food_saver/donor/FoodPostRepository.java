@@ -37,12 +37,6 @@ public class FoodPostRepository {
         firestore = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
     }
-
-    /**
-     * Saves a food post with the photo already compressed to a Base64
-     * string by the caller (see ImageUtils.compressImageToBase64 — must be
-     * done on a background thread before calling this).
-     */
     public void createFoodPost(String photoBase64, String donorName, String foodName,
                                String quantity, String description, long expiresAt,
                                String pickupLocation, String pickupWindow,
@@ -84,13 +78,6 @@ public class FoodPostRepository {
                 })
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
-
-    /**
-     * Updates an existing post's editable fields. photoBase64 is optional —
-     * pass null to leave the existing photo unchanged (donor didn't retake it).
-     * Only posts still "available" should be editable — enforce that check
-     * in the UI layer (FoodPost.isEditable()) before calling this.
-     */
     public void updateFoodPost(String foodId, String photoBase64OrNull, String foodName,
                                String quantity, String description, long expiresAt,
                                String pickupLocation, String pickupWindow,
@@ -116,12 +103,25 @@ public class FoodPostRepository {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onFailure("Failed to update food post: " + e.getMessage()));
     }
-
-    /**
-     * Real-time listener for the currently logged-in donor's own posts,
-     * newest first. Call the returned registration's remove() in onStop()/
-     * onDestroy() to avoid leaking the listener.
-     */
+    public void deleteFoodPost(String foodId, UploadCallback callback) {
+        com.google.firebase.firestore.DocumentReference ref =
+                firestore.collection(POSTS_COLLECTION).document(foodId);
+        firestore.runTransaction(transaction -> {
+                    String status = transaction.get(ref).getString("status");
+                    if (!"available".equals(status)) {
+                        throw new RuntimeException("NOT_DELETABLE");
+                    }
+                    transaction.delete(ref);
+                    return null;
+                }).addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(e -> {
+                    if ("NOT_DELETABLE".equals(e.getMessage())) {
+                        callback.onFailure("An NGO has just requested this post, so it can't be deleted now.");
+                    } else {
+                        callback.onFailure("Failed to delete post: " + e.getMessage());
+                    }
+                });
+    }
     public ListenerRegistration listenToMyPosts(PostsListCallback callback) {
         if (auth.getCurrentUser() == null) {
             callback.onError("Not logged in.");
@@ -203,7 +203,5 @@ public class FoodPostRepository {
         violation.put("reviewed", false);
 
         firestore.collection("policyViolations").document().set(violation);
-        // No success/failure callback needed — this is best-effort logging
-        // and must never block the donor's actual post from going through.
     }
 }

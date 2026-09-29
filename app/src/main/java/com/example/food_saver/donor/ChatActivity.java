@@ -39,13 +39,7 @@ public class ChatActivity extends AppCompatActivity {
 
         InsetsHelper.applyStatusBarTopInset(binding.header);
 
-        // Modern Android draws edge-to-edge, so the classic
-        // windowSoftInputMode="adjustResize" no longer physically resizes
-        // the window when the keyboard opens — the app has to react to the
-        // IME inset itself. This pushes the whole screen's bottom padding
-        // up by exactly the keyboard's height while it's visible (0 when
-        // it's hidden), which shrinks the weighted RecyclerView above and
-        // keeps the message input bar sitting right above the keyboard.
+
         int rootBasePadding = binding.getRoot().getPaddingBottom();
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
             Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
@@ -64,8 +58,6 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        // Always show a plain "Chat" title — showing the other party's
-        // name here could be confusing/misleading, so keep it generic.
         binding.tvChatTitle.setText("Chat");
 
         chatRepository = new ChatRepository();

@@ -87,7 +87,6 @@ public class DonorHomeActivity extends AppCompatActivity {
 
             @Override
             public void onError(String errorMessage) {
-                // Non-critical for the dashboard stat — just leave it at "0".
             }
         });
     }
