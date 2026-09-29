@@ -65,21 +65,21 @@ public class FoodRepository {
         void onStats(float average, int count);
         void onError(String message);
     }
-
-    // 1) DASHBOARD: available posts + posts jo is NGO ne claim ki hain
     public ListenerRegistration[] listenDashboardPosts(String myNgoId, PostsCallback callback) {
-        final Map<String, FoodPost> merged = new HashMap<>();
+        final Map<String, FoodPost> availablePosts = new HashMap<>();
+        final Map<String, FoodPost> myPosts = new HashMap<>();
 
         ListenerRegistration l1 = db.collection("foodPosts")
                 .whereEqualTo("status", "available")
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null) { callback.onError(e); return; }
                     if (snapshots != null) {
+                        availablePosts.clear();
                         for (DocumentSnapshot doc : snapshots.getDocuments()) {
                             FoodPost post = doc.toObject(FoodPost.class);
-                            if (post != null) { post.setFoodId(doc.getId()); merged.put(doc.getId(), post); }
+                            if (post != null) { post.setFoodId(doc.getId()); availablePosts.put(doc.getId(), post); }
                         }
-                        callback.onPosts(new ArrayList<>(merged.values()));
+                        callback.onPosts(mergePosts(availablePosts, myPosts));
                     }
                 });
 
@@ -88,18 +88,22 @@ public class FoodRepository {
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null) { callback.onError(e); return; }
                     if (snapshots != null) {
+                        myPosts.clear();
                         for (DocumentSnapshot doc : snapshots.getDocuments()) {
                             FoodPost post = doc.toObject(FoodPost.class);
-                            if (post != null) { post.setFoodId(doc.getId()); merged.put(doc.getId(), post); }
+                            if (post != null) { post.setFoodId(doc.getId()); myPosts.put(doc.getId(), post); }
                         }
-                        callback.onPosts(new ArrayList<>(merged.values()));
+                        callback.onPosts(mergePosts(availablePosts, myPosts));
                     }
                 });
 
         return new ListenerRegistration[]{l1, l2};
     }
-
-    // 2) SINGLE POST live updates (Food Detail screen ke liye)
+    private List<FoodPost> mergePosts(Map<String, FoodPost> available, Map<String, FoodPost> mine) {
+        Map<String, FoodPost> merged = new HashMap<>(available);
+        merged.putAll(mine);
+        return new ArrayList<>(merged.values());
+    }
     public ListenerRegistration listenPost(String foodId, SinglePostCallback callback) {
         return db.collection("foodPosts").document(foodId)
                 .addSnapshotListener((doc, e) -> {
@@ -111,14 +115,9 @@ public class FoodRepository {
                     }
                 });
     }
-
-    // 3) REQUEST FOOD — transaction se atomic hota hai, isliye do NGOs
-    //    ek sath request karein to sirf ek hi jeetegi ("claimed" race safe).
     public void requestFood(String foodId, String ngoId, String ngoName, String donorId,
                             SimpleCallback callback) {
         if (ngoId == null) {
-            // Defense in depth — never write a request/claim with a null
-            // ngoId, since this NGO could then never recognize it as "mine".
             callback.onError("Not logged in — please log in again.");
             return;
         }
@@ -131,6 +130,10 @@ public class FoodRepository {
 
                     if (!"available".equals(currentStatus)) {
                         throw new RuntimeException("ALREADY_CLAIMED");
+                    }
+                    Long expiresAt = snapshot.getLong("expiresAt");
+                    if (expiresAt != null && expiresAt > 0 && System.currentTimeMillis() > expiresAt) {
+                        throw new RuntimeException("EXPIRED");
                     }
 
                     Map<String, Object> postUpdate = new HashMap<>();
@@ -148,13 +151,15 @@ public class FoodRepository {
                 .addOnFailureListener(e -> {
                     if ("ALREADY_CLAIMED".equals(e.getMessage())) {
                         callback.onError("This food post has already been claimed by another NGO.");
+                    } else if ("EXPIRED".equals(e.getMessage())) {
+                        callback.onError("This food post has expired and can no longer be requested.");
                     } else {
                         callback.onError("Error while sending request: " + e.getMessage());
                     }
                 });
     }
 
-    // 3b) CANCEL REQUEST — NGO changes its mind before the donor responds.
+    // CANCEL REQUEST — NGO changes its mind before the donor responds.
     // Reverts the FoodPost back to "available" and clears the claim, so
     // other NGOs can request it again.
     public void cancelRequest(String requestId, String foodPostId, SimpleCallback callback) {
@@ -175,7 +180,6 @@ public class FoodRepository {
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
 
-    // 4) STATUS UPDATES (donor ki taraf se "approved" set hota hai — woh Donor module karega)
     public void markCollected(String foodId, SimpleCallback callback) {
         db.collection("foodPosts").document(foodId)
                 .update("status", "collected")
@@ -189,14 +193,6 @@ public class FoodRepository {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
-
-    // 4b) DUAL-CONFIRMATION HANDOVER (mirrors the Donor module's
-    // markHandedOverByDonor, swapped). The Donor and this NGO each confirm
-    // their own half on the shared "requests/{requestId}" document — only
-    // once BOTH donorConfirmedHandover and ngoConfirmedReceived are true
-    // does the request (and the linked FoodPost) move to "handedOver".
-
-    /** Finds the single request document linking this NGO to this food post, with live updates. */
     public ListenerRegistration listenRequestForPost(String foodId, String ngoId, RequestCallback callback) {
         return db.collection("requests")
                 .whereEqualTo("foodPostId", foodId)
@@ -212,16 +208,6 @@ public class FoodRepository {
                     }
                 });
     }
-
-    /**
-     * NGO's half of the dual-confirmation handover. Sets
-     * ngoConfirmedReceived = true. If the donor has ALREADY confirmed their
-     * side (donorConfirmedHandover == true), this completes the handover:
-     * both the request and its linked FoodPost move to "handedOver".
-     * Otherwise the request moves to "collected" — "one side confirmed,
-     * waiting on the other". Runs as a transaction so two near-simultaneous
-     * confirmations can't race each other into an inconsistent state.
-     */
     public void markReceivedByNgo(String requestId, String foodId, SimpleCallback callback) {
         DocumentReference requestRef = db.collection("requests").document(requestId);
         DocumentReference postRef = db.collection("foodPosts").document(foodId);
@@ -247,15 +233,6 @@ public class FoodRepository {
                 }).addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
-
-    // 5) DELIVERY DETAILS (rider name, phone, vehicle, time of arrival)
-    /**
-     * Delivery details are written directly onto the accepted request
-     * document (matching the Donor module's Request.java field names:
-     * riderName, riderPhone, vehicleNumber, arrivalTime) — NOT a separate
-     * subcollection — since that's what the donor's Requests screen
-     * actually reads to show these details on the post.
-     */
     public void saveDeliveryDetails(String requestId, DeliveryDetails details, SimpleCallback callback) {
         java.util.Map<String, Object> updates = new java.util.HashMap<>();
         updates.put("riderName", details.getRiderName());
@@ -268,10 +245,6 @@ public class FoodRepository {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
-
-    // 6) CHAT — scoped per accepted request (matches the Donor module's
-    // schema): "chats/{requestId}/messages/{messageId}". requestId doubles
-    // as the chat thread's id, so both sides read/write the exact same path.
     public ListenerRegistration listenMessages(String requestId, MessagesCallback callback) {
         return db.collection("chats").document(requestId).collection("messages")
                 .orderBy("timestamp", Query.Direction.ASCENDING)
@@ -301,8 +274,6 @@ public class FoodRepository {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
-
-    /** Average stars + count of all ratings a donor has received — shown to an NGO before it requests their food. */
     public void getDonorRatingStats(String donorId, RatingStatsCallback callback) {
         db.collection("ratings")
                 .whereEqualTo("donorId", donorId)
@@ -319,8 +290,6 @@ public class FoodRepository {
                 })
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
-
-    // 8) TRANSPARENCY DASHBOARD (is NGO ki apni activity ka summary)
     public void getNgoStats(String ngoId, PostsCallback callback) {
         db.collection("foodPosts")
                 .whereEqualTo("claimedByNgoId", ngoId)
@@ -335,9 +304,6 @@ public class FoodRepository {
                 })
                 .addOnFailureListener(callback::onError);
     }
-
-    // 9) MY COLLECTIONS / HISTORY — every post this NGO has ever claimed,
-    // regardless of current status (requested through handedOver).
     public ListenerRegistration listenMyCollections(String ngoId, PostsCallback callback) {
         return db.collection("foodPosts")
                 .whereEqualTo("claimedByNgoId", ngoId)
@@ -354,10 +320,8 @@ public class FoodRepository {
                     callback.onPosts(posts);
                 });
     }
-
-    // 10) NGO PROFILE
     public void getNgoProfile(String ngoId, ProfileCallback callback) {
-        db.collection("ngos").document(ngoId).get()
+        db.collection("users").document(ngoId).get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         callback.onProfile(doc.getString("name"), doc.getString("phone"), doc.getString("address"));
@@ -373,7 +337,7 @@ public class FoodRepository {
         data.put("name", name);
         data.put("phone", phone);
         data.put("address", address);
-        db.collection("ngos").document(ngoId)
+        db.collection("users").document(ngoId)
                 .set(data, SetOptions.merge())
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));

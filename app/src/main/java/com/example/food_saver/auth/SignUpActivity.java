@@ -69,8 +69,6 @@ public class SignUpActivity extends AppCompatActivity {
                 : InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         binding.etPassword.setSelection(selection);
     }
-
-    /** Swaps the hint text so the requirement matches the selected role. */
     private void updateDocumentLabelForRole() {
         boolean isDonor = binding.rbDonor.isChecked();
         binding.tvDocumentLabel.setText(isDonor
@@ -106,8 +104,6 @@ public class SignUpActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // Compress off the main thread — decoding + JPEG compression can
-        // take a noticeable moment and would otherwise freeze the UI.
         Uri documentUri = selectedDocumentUri;
         new Thread(() -> {
             try {

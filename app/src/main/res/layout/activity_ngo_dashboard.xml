@@ -6,7 +6,6 @@
     android:orientation="vertical"
     android:background="@color/off_white">
 
-    <!-- Header -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -49,9 +48,17 @@
                 android:textColor="@color/cream_light"
                 android:textSize="13sp" />
         </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnRefresh"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Refresh posts"
+            android:padding="10dp"
+            android:src="@drawable/ic_refresh" />
     </LinearLayout>
 
-    <!-- Search + sort-by-distance row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -103,7 +110,6 @@
         android:textColor="@color/gray_secondary"
         android:visibility="gone" />
 
-    <!-- Bottom navigation -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"

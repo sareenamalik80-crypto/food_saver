@@ -54,7 +54,6 @@
                 android:textColor="@color/text_muted"
                 android:textSize="14sp" />
 
-            <!-- Signed in as (Google account, read-only) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -89,7 +88,6 @@
                     tools:text="fatima@gmail.com" />
             </LinearLayout>
 
-            <!-- Role selection -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -125,7 +123,6 @@
                     android:textColor="@color/text_dark" />
             </RadioGroup>
 
-            <!-- Phone -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
@@ -188,7 +185,6 @@
                     android:textSize="15sp" />
             </LinearLayout>
 
-            <!-- Verification document -->
             <TextView
                 android:id="@+id/tvDocumentLabel"
                 android:layout_width="wrap_content"

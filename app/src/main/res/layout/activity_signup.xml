@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/cream_background">
 
-    <!-- Decorative background blobs -->
     <View
         android:layout_width="200dp"
         android:layout_height="200dp"
@@ -63,7 +62,6 @@
                 android:textColor="@color/text_muted"
                 android:textSize="14sp" />
 
-        <!-- Role selection -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -99,7 +97,6 @@
                 android:textColor="@color/text_dark" />
         </RadioGroup>
 
-        <!-- Full Name / Organization -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -131,7 +128,6 @@
                 android:textSize="15sp" />
         </LinearLayout>
 
-        <!-- Email -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -163,7 +159,6 @@
                 android:textSize="15sp" />
         </LinearLayout>
 
-        <!-- Phone -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -195,7 +190,6 @@
                 android:textSize="15sp" />
         </LinearLayout>
 
-        <!-- Address -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -226,7 +220,6 @@
                 android:textSize="15sp" />
         </LinearLayout>
 
-        <!-- Password -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -266,7 +259,6 @@
                 android:src="@drawable/ic_eye_toggle" />
         </LinearLayout>
 
-        <!-- Verification document — mandatory for both Donor and NGO -->
         <TextView
             android:id="@+id/tvDocumentLabel"
             android:layout_width="wrap_content"

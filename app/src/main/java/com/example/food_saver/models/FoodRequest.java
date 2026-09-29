@@ -47,11 +47,6 @@ public class FoodRequest {
 
     public long getRespondedAt() { return respondedAt; }
     public void setRespondedAt(long respondedAt) { this.respondedAt = respondedAt; }
-
-    // Dual-confirmation handover flags. Both sides must independently mark
-    // their half before the request (and the linked FoodPost) moves to
-    // "handedOver". donorConfirmedHandover is written by the Donor module —
-    // this NGO module only reads it. ngoConfirmedReceived is written here.
     private boolean donorConfirmedHandover;
     private boolean ngoConfirmedReceived;
 

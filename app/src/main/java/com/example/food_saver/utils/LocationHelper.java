@@ -15,15 +15,6 @@ import com.google.android.gms.location.Priority;
 
 import java.util.List;
 import java.util.Locale;
-
-/**
- * Wraps FusedLocationProviderClient + Geocoder so the Post Food / Edit Food
- * screens can fill in "Pickup Location" from the donor's actual GPS
- * position instead of manual typing.
- *
- * Caller must have already checked/requested ACCESS_FINE_LOCATION before
- * calling fetchCurrentLocation — this class doesn't handle permissions.
- */
 public class LocationHelper {
 
     public interface LocationCallback {
@@ -50,8 +41,6 @@ public class LocationHelper {
                 })
                 .addOnFailureListener(e -> callback.onError("Location fetch failed: " + e.getMessage()));
     }
-
-    /** Best-effort address lookup — returns null (not a crash) if it fails. */
     private static String reverseGeocode(Context context, Location location) {
         try {
             Geocoder geocoder = new Geocoder(context, Locale.getDefault());

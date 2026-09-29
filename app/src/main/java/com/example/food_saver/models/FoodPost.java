@@ -1,12 +1,6 @@
 package com.example.food_saver.models;
 
 import com.google.firebase.firestore.Exclude;
-
-/**
- * Represents a food donation post — Firestore collection "foodPosts/{foodId}".
- * Field names match the schema agreed with the NGO module.
- * Status flow: available -> requested -> approved -> collected -> handedOver.
- */
 public class FoodPost {
 
     public static final String STATUS_AVAILABLE = "available";
@@ -30,13 +24,9 @@ public class FoodPost {
 
     private String pickupLocation;
     private String pickupWindow;
-
-    // GPS coordinates captured from the donor's device at post time — lets
-    // the NGO see exactly where to go, not just a typed address.
     private double pickupLat;
     private double pickupLng;
 
-    // Empty constructor required for Firestore deserialization
     public FoodPost() {
     }
 
@@ -110,6 +100,25 @@ public class FoodPost {
     /** True once the donor has editable rights over this post — only while nobody has requested it yet. */
     @Exclude
     public boolean isEditable() {
+        return STATUS_AVAILABLE.equals(status);
+    }
+
+    /** Past its expiry date and never picked up (available / waiting for approval). */
+    @Exclude
+    public boolean isExpired() {
+        boolean open = STATUS_AVAILABLE.equals(status) || STATUS_REQUESTED.equals(status);
+        return open && expiresAt > 0 && System.currentTimeMillis() > expiresAt;
+    }
+
+    /** Both sides confirmed the handover — the donation is fully done. */
+    @Exclude
+    public boolean isCompleted() {
+        return STATUS_HANDED_OVER.equals(status);
+    }
+
+    /** Only a post nobody has requested yet may be deleted by its donor. */
+    @Exclude
+    public boolean isDeletable() {
         return STATUS_AVAILABLE.equals(status);
     }
 }

@@ -20,8 +20,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Food_saver">
 
-        <!-- App starts on SplashActivity, which routes to LoginActivity.
-             LoginActivity then routes by role: Donor -> .donor.*, NGO -> .ngo.* -->
         <activity
             android:name=".auth.SplashActivity"
             android:exported="true">
@@ -36,7 +34,6 @@
         <activity android:name=".auth.CompleteGoogleProfileActivity" android:exported="false" />
         <activity android:name=".auth.PendingVerificationActivity" android:exported="false" />
 
-        <!-- Kept but unused now that Splash + Login handle app start. -->
         <activity android:name=".MainActivity" android:exported="false" />
 
         <!-- Donor module -->

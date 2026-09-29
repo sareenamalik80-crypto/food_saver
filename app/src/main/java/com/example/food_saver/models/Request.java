@@ -1,22 +1,6 @@
 package com.example.food_saver.models;
 
 import com.google.firebase.firestore.Exclude;
-
-/**
- * Represents an NGO's request on a donor's food post.
- * Firestore collection "requests/{requestId}" — field names match exactly
- * what the NGO module writes (agreed with teammate):
- * requestId, foodPostId, ngoId, ngoName, donorId, status, requestedAt, respondedAt.
- *
- * There is deliberately NO foodPostTitle / foodPostImageUrl here — the
- * Donor's "NGO Requests" screen fetches the linked foodPosts/{foodPostId}
- * document itself to get foodName + imageUrl (see RequestRepository,
- * which populates the two transient fields below after that fetch).
- *
- * Status flow (matches FoodPost's flow): requested -> approved (donor
- * accepts) or back to available on the FoodPost (donor rejects) ->
- * collected -> handedOver.
- */
 public class Request {
 
     public static final String STATUS_REQUESTED = "requested";
@@ -39,24 +23,10 @@ public class Request {
     private String vehicleNumber;
     private String riderPhone;
     private String arrivalTime;
-
-    // Dual-confirmation handover flags. Both sides must independently mark
-    // their half before the request (and the linked FoodPost) is moved to
-    // STATUS_HANDED_OVER. Firestore defaults a missing boolean field to
-    // false, so existing/older documents are safely treated as unconfirmed.
-    // NGO module: please write to "ngoConfirmedReceived" using this exact
-    // field name when your teammate implements the "Mark as Received" button.
     private boolean donorConfirmedHandover;
     private boolean ngoConfirmedReceived;
-
-    // NOT stored in Firestore on this collection — populated locally after
-    // fetching the linked foodPosts/{foodPostId} document, purely so the
-    // adapter has something to display without a second round-trip per bind.
-    // @Exclude tells Firestore's mapper to ignore these when reading/writing.
     private String foodName;
     private String foodImageBase64;
-
-    // Empty constructor required for Firestore deserialization
     public Request() {
     }
 

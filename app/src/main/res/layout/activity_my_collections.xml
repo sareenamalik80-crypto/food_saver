@@ -60,7 +60,6 @@
         android:textColor="@color/gray_secondary"
         android:visibility="gone" />
 
-    <!-- Bottom navigation -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"

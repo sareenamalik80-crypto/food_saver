@@ -1,10 +1,4 @@
 package com.example.food_saver.models;
-
-/**
- * A single chat message. Firestore collection
- * "chats/{requestId}/messages/{messageId}" — one chat thread per accepted
- * request, so the requestId doubles as the chat id.
- */
 public class ChatMessage {
 
     private String messageId;
@@ -12,8 +6,6 @@ public class ChatMessage {
     private String senderRole;   // "donor" ya "ngo" — optional, set by the NGO module
     private String text;
     private long timestamp;
-
-    // Empty constructor required for Firestore deserialization
     public ChatMessage() {
     }
 

@@ -60,7 +60,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Accept / Reject — visible only while pending -->
         <LinearLayout
             android:id="@+id/actionsPending"
             android:layout_width="match_parent"
@@ -90,7 +89,6 @@
                 android:textColor="@color/white" />
         </LinearLayout>
 
-        <!-- Delivery info — visible once NGO fills it in, after acceptance -->
         <LinearLayout
             android:id="@+id/deliveryInfoLayout"
             android:layout_width="match_parent"
@@ -116,7 +114,6 @@
             <TextView android:id="@+id/tvArrivalTime" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/text_dark" android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Chat — visible once accepted -->
         <Button
             android:id="@+id/btnChat"
             android:layout_width="match_parent"
@@ -127,8 +124,6 @@
             android:textColor="@color/brown_primary"
             android:visibility="gone" />
 
-        <!-- Dual-confirmation handover: donor's own confirmation button,
-             visible once accepted and until the donor has pressed it. -->
         <Button
             android:id="@+id/btnMarkHandedOver"
             android:layout_width="match_parent"
@@ -139,8 +134,6 @@
             android:textColor="@color/white"
             android:visibility="gone" />
 
-        <!-- Shows once the donor has confirmed: either waiting on the NGO,
-             or fully complete once both sides have confirmed. -->
         <TextView
             android:id="@+id/tvHandoverNote"
             android:layout_width="match_parent"

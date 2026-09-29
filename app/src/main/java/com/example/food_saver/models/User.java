@@ -1,10 +1,4 @@
 package com.example.food_saver.models;
-
-/**
- * Represents a user document stored in Firestore under "users/{uid}".
- * role: "admin" | "donor" | "ngo"
- * status: "pending" | "verified" | "rejected"  (admin accounts are always "verified")
- */
 public class User {
 
     public static final String ROLE_ADMIN = "admin";
@@ -24,8 +18,6 @@ public class User {
     private String status;
     private String orgDocUrl;   // NGO registration doc / CNIC image, optional for donor
     private long createdAt;
-
-    // Empty constructor required for Firestore deserialization
     public User() {
     }
 

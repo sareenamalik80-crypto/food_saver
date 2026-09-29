@@ -60,8 +60,6 @@
         android:paddingHorizontal="16dp"
         android:paddingBottom="16dp" />
 
-
-    <!-- Bottom navigation -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"

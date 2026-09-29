@@ -23,8 +23,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Read from local.properties (per-machine, never committed to Git)
-        // so the Gemini API key never ends up in source control.
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
@@ -51,8 +49,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // Required — LoginActivity/SignUpActivity/PendingVerificationActivity
-    // use generated ActivityXBinding classes (e.g. ActivityLoginBinding).
     buildFeatures {
         viewBinding = true
         buildConfig = true
@@ -78,7 +74,6 @@ dependencies {
     implementation("androidx.camera:camera-view:1.4.0")
     implementation("com.google.guava:guava:33.3.1-android")
 
-    // GPS location for "Use My Current Location" on Post Food / Edit Food Post
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 

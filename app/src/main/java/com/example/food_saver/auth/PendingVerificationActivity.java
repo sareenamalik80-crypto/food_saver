@@ -8,11 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.food_saver.databinding.ActivityPendingVerificationBinding;
 import com.example.food_saver.models.User;
 
-/**
- * Shown after signup (and on login) while a donor/NGO account's
- * status is still "pending". A "Refresh status" button re-checks
- * Firestore in case admin has verified them in the meantime.
- */
 public class PendingVerificationActivity extends AppCompatActivity {
 
     private ActivityPendingVerificationBinding binding;

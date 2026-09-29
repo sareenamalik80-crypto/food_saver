@@ -136,9 +136,7 @@
             android:textColor="@color/charcoal"
             tools:text="Freshly cooked, packed in trays, pickup available till 8 PM." />
 
-        <!-- Yeh button apna text/visibility Java code se status ke hisaab se
-             set karega: Request This Food / Pending Approval / Already Claimed /
-             Fill Delivery Details / Mark as Collected / Mark as Handed Over -->
+
         <Button
             android:id="@+id/btnPrimaryAction"
             android:layout_width="match_parent"
@@ -150,8 +148,7 @@
             android:padding="14dp"
             android:text="Request This Food" />
 
-        <!-- Shown only while this NGO's own request is still pending — lets
-             it change its mind before the donor responds. -->
+
         <Button
             android:id="@+id/btnCancelRequest"
             android:layout_width="match_parent"
@@ -174,8 +171,6 @@
             android:text="Open Chat"
             android:visibility="gone" />
 
-        <!-- Dual-confirmation handover: this NGO's own confirmation button,
-             visible once approved and until this NGO has pressed it. -->
         <Button
             android:id="@+id/btnMarkReceived"
             android:layout_width="match_parent"
@@ -188,8 +183,6 @@
             android:text="Mark as Received"
             android:visibility="gone" />
 
-        <!-- Shows once this NGO has confirmed: either waiting on the donor,
-             or fully complete once both sides have confirmed. -->
         <TextView
             android:id="@+id/tvHandoverNote"
             android:layout_width="match_parent"

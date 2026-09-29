@@ -9,17 +9,6 @@ import android.util.Base64;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-/**
- * Firebase Storage requires the paid Blaze plan, so images are instead
- * compressed and stored as Base64 strings directly inside Firestore
- * documents. Firestore caps a document at 1 MiB total, so images are
- * downsampled and JPEG-compressed to stay comfortably under that.
- *
- * IMPORTANT: call compressImageToBase64 on a background thread — decoding
- * and compressing a photo can take a noticeable moment and will freeze the
- * UI if run on the main thread.
- */
 public class ImageUtils {
 
     /**

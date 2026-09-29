@@ -61,14 +61,12 @@
             android:textSize="13sp"
             android:layout_marginBottom="16dp" />
 
-        <!-- Camera preview -->
         <androidx.camera.view.PreviewView
             android:id="@+id/cameraPreview"
             android:layout_width="match_parent"
             android:layout_height="360dp"
             android:background="@color/text_dark" />
 
-        <!-- Captured photo preview (shown after capture, camera hidden) -->
         <ImageView
             android:id="@+id/ivCapturedPhoto"
             android:layout_width="match_parent"
@@ -96,7 +94,6 @@
             android:textColor="@color/brown_primary"
             android:visibility="gone" />
 
-        <!-- Details form, revealed after a photo is captured -->
         <LinearLayout
             android:id="@+id/detailsForm"
             android:layout_width="match_parent"

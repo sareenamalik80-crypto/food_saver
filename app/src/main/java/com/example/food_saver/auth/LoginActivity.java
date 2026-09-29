@@ -194,12 +194,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Central routing point: role decides which dashboard, status decides
-     * whether a donor/NGO account is even allowed in yet.
-     * NOTE: Admin and NGO dashboards are placeholders until those modules
-     * are built — replace the commented lines as they land.
-     */
     void routeUser(User user) {
         if (User.ROLE_ADMIN.equals(user.getRole())) {
             // startActivity(new Intent(this, AdminDashboardActivity.class));
