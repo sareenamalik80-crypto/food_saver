@@ -21,8 +21,6 @@ public class DonationMonitoringViewModel extends ViewModel {
     private final MutableLiveData<DonationMonitoringUiState> uiState =
             new MutableLiveData<>(DonationMonitoringUiState.initial());
 
-    // Full, unfiltered result from Firestore. The search box filters this
-    // list locally instead of re-querying on every keystroke.
     private List<DonationItem> rawDonations = new ArrayList<>();
 
     public DonationMonitoringViewModel() {

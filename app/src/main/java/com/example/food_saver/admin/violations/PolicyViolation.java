@@ -1,10 +1,5 @@
 package com.example.food_saver.admin.violations;
 
-/**
- * A record of a donor overriding the AI photo check (posting/saving a photo
- * the AI flagged as not-real-food / AI-generated / a screenshot).
- * Firestore collection "policyViolations/{violationId}".
- */
 public class PolicyViolation {
 
     private String violationId;

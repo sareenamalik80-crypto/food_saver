@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/indigo_purple">
 
-    <!-- Logo + name + slogan, nudged above true center to make room for the hill below -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,7 +39,7 @@
 
     </LinearLayout>
 
-    <!-- Hill footer -->
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="260dp"

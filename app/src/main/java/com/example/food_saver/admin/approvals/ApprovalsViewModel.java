@@ -13,10 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Uses the real "users" collection schema: role in {donor, ngo},
- * status in {pending, verified, rejected} (see AuthRepository/User).
- */
 public class ApprovalsViewModel extends ViewModel {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -25,8 +21,6 @@ public class ApprovalsViewModel extends ViewModel {
     private final MutableLiveData<ApprovalsUiState> uiState =
             new MutableLiveData<>(ApprovalsUiState.initial());
 
-    // Full, unfiltered result for the current status tab. The search box
-    // filters this list locally instead of re-querying Firestore on every keystroke.
     private List<PendingAccount> rawAccounts = new ArrayList<>();
 
     public ApprovalsViewModel() {

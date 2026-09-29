@@ -6,7 +6,6 @@
     android:background="@color/cream_background"
     android:orientation="vertical">
 
-    <!-- Header: fixed at top, gets its own top inset so it never sits under the status bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -114,7 +113,7 @@
                     android:layout_marginStart="6dp" />
             </LinearLayout>
 
-            <!-- Stats grid: row 2 -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -212,7 +211,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Monitoring card -->
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardMonitoring"
                 android:layout_width="match_parent"
@@ -263,7 +262,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- User management card -->
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardUserManagement"
                 android:layout_width="match_parent"
@@ -314,7 +313,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Flagged content card -->
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardFlagged"
                 android:layout_width="match_parent"

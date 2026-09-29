@@ -5,7 +5,7 @@
     android:background="@color/cream_background"
     android:fitsSystemWindows="true">
 
-    <!-- Decorative background blobs -->
+
     <View
         android:layout_width="220dp"
         android:layout_height="220dp"
@@ -62,7 +62,7 @@
                 android:textColor="@color/text_muted"
                 android:textSize="13sp" />
 
-            <!-- Email field -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
@@ -93,7 +93,7 @@
                     android:textSize="15sp" />
             </LinearLayout>
 
-            <!-- Password field -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="56dp"

@@ -2,10 +2,7 @@ package com.example.food_saver.admin.monitoring;
 
 import com.google.firebase.firestore.PropertyName;
 
-/**
- * Field names match the real "foodPosts" collection schema written by the
- * donor module (see FoodPost.java): foodName, donorName, quantity, status, postedAt.
- */
+
 public class DonationItem {
 
     private String id;
@@ -16,7 +13,7 @@ public class DonationItem {
     private Long postedAt;
 
     public DonationItem() {
-        // Required empty constructor for Firestore deserialization.
+
     }
 
     public String getId() { return id; }

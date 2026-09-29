@@ -110,9 +110,7 @@ public class ApprovalsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Approve/Reject can also happen from AccountDetailActivity, which
-        // writes to Firestore directly rather than through this ViewModel —
-        // refresh here so returning to this list always reflects that.
+
         viewModel.loadAccounts();
     }
 

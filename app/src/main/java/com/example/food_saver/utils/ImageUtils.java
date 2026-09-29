@@ -10,16 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Firebase Storage requires the paid Blaze plan, so images are instead
- * compressed and stored as Base64 strings directly inside Firestore
- * documents. Firestore caps a document at 1 MiB total, so images are
- * downsampled and JPEG-compressed to stay comfortably under that.
- *
- * IMPORTANT: call compressImageToBase64 on a background thread — decoding
- * and compressing a photo can take a noticeable moment and will freeze the
- * UI if run on the main thread.
- */
+
 public class ImageUtils {
 
     /**
@@ -39,7 +30,6 @@ public class ImageUtils {
         return Base64.encodeToString(bytes, Base64.NO_WRAP);
     }
 
-    /** Decodes a stored Base64 string back to raw bytes — feed this straight into Glide. */
     public static byte[] decodeBase64ToBytes(String base64) {
         if (base64 == null || base64.isEmpty()) return new byte[0];
         return Base64.decode(base64, Base64.NO_WRAP);

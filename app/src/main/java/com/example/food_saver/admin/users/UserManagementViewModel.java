@@ -22,8 +22,6 @@ public class UserManagementViewModel extends ViewModel {
     private final MutableLiveData<UserManagementUiState> uiState =
             new MutableLiveData<>(UserManagementUiState.initial());
 
-    // Full, unfiltered result for the current role tab. The search box
-    // filters this list locally instead of re-querying Firestore on every keystroke.
     private List<AppUser> rawUsers = new ArrayList<>();
 
     public UserManagementViewModel() {

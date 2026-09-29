@@ -1,10 +1,6 @@
 package com.example.food_saver.admin.users;
 
-/**
- * NOTE: field names (role, verificationStatus, accountStatus) follow the
- * same assumptions used elsewhere in the admin module — adjust to match
- * the actual users collection schema.
- */
+
 public class AppUser {
 
     private String uid;
@@ -16,7 +12,6 @@ public class AppUser {
     private long flagCount;
 
     public AppUser() {
-        // Required empty constructor for Firestore deserialization.
     }
 
     public String getUid() { return uid; }

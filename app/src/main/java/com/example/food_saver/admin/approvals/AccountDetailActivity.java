@@ -99,9 +99,6 @@ public class AccountDetailActivity extends AppCompatActivity {
             binding.tvNoDocument.setVisibility(View.VISIBLE);
         }
 
-        // Once a decision has already been made, keep the buttons available
-        // so admin can change their mind (matches the list screen's
-        // Approve/Revoke behaviour) — just relabel for clarity.
         binding.btnApprove.setEnabled(!"verified".equals(currentStatus));
         binding.btnReject.setEnabled(!"rejected".equals(currentStatus));
     }

@@ -1,10 +1,5 @@
 package com.example.food_saver.admin.approvals;
 
-/**
- * Simple model for a donor/NGO account awaiting admin verification.
- * Field names mirror the real "users" collection schema from AuthRepository/User:
- * role ("donor" | "ngo"), status ("pending" | "verified" | "rejected").
- */
 public class PendingAccount {
 
     private String uid;
@@ -17,7 +12,7 @@ public class PendingAccount {
     private String orgDocUrl; // Base64 verification document (License Certificate / Food Authority Letter)
 
     public PendingAccount() {
-        // Required empty constructor for Firestore deserialization.
+
     }
 
     public PendingAccount(String uid, String name, String email, String role, String status) {
