@@ -76,11 +76,17 @@ public class DonorHomeActivity extends AppCompatActivity {
                     }
                 }
                 binding.tvPendingRequests.setText(String.valueOf(pending));
+
+                if (pending > 0) {
+                    binding.tvRequestsBadge.setVisibility(android.view.View.VISIBLE);
+                    binding.tvRequestsBadge.setText(pending > 9 ? "9+" : String.valueOf(pending));
+                } else {
+                    binding.tvRequestsBadge.setVisibility(android.view.View.GONE);
+                }
             }
 
             @Override
             public void onError(String errorMessage) {
-                // Non-critical for the dashboard stat — just leave it at "0".
             }
         });
     }

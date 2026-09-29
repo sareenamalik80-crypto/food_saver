@@ -23,11 +23,21 @@ public class FoodPostAdapter extends RecyclerView.Adapter<FoodPostAdapter.FoodPo
         void onPostClick(FoodPost post);
     }
 
+    public interface OnPostDeleteListener {
+        void onPostDelete(FoodPost post);
+    }
+
     private final List<FoodPost> posts = new ArrayList<>();
     private final OnPostClickListener listener;
+    private final OnPostDeleteListener deleteListener;
 
     public FoodPostAdapter(OnPostClickListener listener) {
+        this(listener, null);
+    }
+
+    public FoodPostAdapter(OnPostClickListener listener, OnPostDeleteListener deleteListener) {
         this.listener = listener;
+        this.deleteListener = deleteListener;
     }
 
     public void submitList(List<FoodPost> newPosts) {
@@ -46,7 +56,7 @@ public class FoodPostAdapter extends RecyclerView.Adapter<FoodPostAdapter.FoodPo
 
     @Override
     public void onBindViewHolder(@NonNull FoodPostViewHolder holder, int position) {
-        holder.bind(posts.get(position), listener);
+        holder.bind(posts.get(position), listener, deleteListener);
     }
 
     @Override
@@ -64,11 +74,21 @@ public class FoodPostAdapter extends RecyclerView.Adapter<FoodPostAdapter.FoodPo
             this.binding = binding;
         }
 
-        void bind(FoodPost post, OnPostClickListener listener) {
+        void bind(FoodPost post, OnPostClickListener listener, OnPostDeleteListener deleteListener) {
             binding.tvTitle.setText(post.getFoodName());
             binding.tvQuantity.setText(post.getQuantity());
             binding.tvExpiry.setText("Expires: " + dateFormat.format(new Date(post.getExpiresAt())));
-            binding.tvStatus.setText(capitalize(post.getStatus()));
+            android.content.Context ctx = binding.getRoot().getContext();
+            if (post.isExpired()) {
+                binding.tvStatus.setText("Expired");
+                binding.tvStatus.setTextColor(ctx.getColor(com.example.food_saver.R.color.error_red));
+            } else if (post.isCompleted()) {
+                binding.tvStatus.setText("Completed");
+                binding.tvStatus.setTextColor(ctx.getColor(com.example.food_saver.R.color.success_green));
+            } else {
+                binding.tvStatus.setText(capitalize(post.getStatus()));
+                binding.tvStatus.setTextColor(ctx.getColor(com.example.food_saver.R.color.brown_primary));
+            }
             binding.tvEditHint.setVisibility(post.isEditable() ? android.view.View.VISIBLE : android.view.View.GONE);
 
             // imageUrl field holds a Base64 string, not a Storage URL —
@@ -78,6 +98,13 @@ public class FoodPostAdapter extends RecyclerView.Adapter<FoodPostAdapter.FoodPo
                     .load(imageBytes)
                     .centerCrop()
                     .into(binding.ivFoodPhoto);
+
+            binding.btnDelete.setVisibility(
+                    deleteListener != null && post.isDeletable()
+                            ? android.view.View.VISIBLE : android.view.View.GONE);
+            binding.btnDelete.setOnClickListener(v -> {
+                if (deleteListener != null) deleteListener.onPostDelete(post);
+            });
 
             binding.getRoot().setOnClickListener(v -> {
                 if (listener != null) listener.onPostClick(post);

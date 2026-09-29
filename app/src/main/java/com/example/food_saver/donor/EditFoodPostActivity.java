@@ -35,12 +35,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Locale;
 
-/**
- * Lets a donor edit a food post they already created — only while it's
- * still "available" (nobody has requested it yet). Launched from
- * MyDonationsActivity with EXTRA_FOOD_ID; check FoodPost.isEditable()
- * before starting this Activity.
- */
 public class EditFoodPostActivity extends AppCompatActivity {
 
     public static final String EXTRA_FOOD_ID = "extra_food_id";
@@ -203,10 +197,6 @@ public class EditFoodPostActivity extends AppCompatActivity {
     private void capturePhoto() {
         if (imageCapture == null) return;
 
-        // Save to the app's own private cache dir instead of the public
-        // MediaStore gallery — sidesteps MediaStore write failures seen on
-        // some OEM ROMs (e.g. "Failed to write to MediaStore URI: null" on
-        // Huawei) since the photo is only ever used internally.
         java.io.File photoFile = new java.io.File(getCacheDir(),
                 "foodbridge_edit_" + System.currentTimeMillis() + ".jpg");
 
@@ -336,15 +326,9 @@ public class EditFoodPostActivity extends AppCompatActivity {
 
                         @Override
                         public void onCheckFailed(String message) {
-                            // Fail open — a network/API hiccup shouldn't
-                            // block a real donor from saving. Still show the
-                            // error so it's visible during testing/debugging.
                             runOnUiThread(() -> {
-                                Toast.makeText(EditFoodPostActivity.this,
-                                        "AI check failed (saving anyway): " + message, Toast.LENGTH_LONG).show();
-                                foodPostRepository.updateFoodPost(foodId, photoBase64,
-                                        foodName, quantity, description, expiresAt, pickupLocation,
-                                        pickupWindow, lat, lng, saveCallback());
+                                setLoading(false);
+                                showCheckFailedDialog(message);
                             });
                         }
                     });
@@ -360,11 +344,18 @@ public class EditFoodPostActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * The AI check flagged something (not real food / looks AI-generated /
-     * looks like a screenshot). This is a heuristic, not proof, so the
-     * donor can either retake the photo or save anyway.
-     */
+    private void showCheckFailedDialog(String message) {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Couldn't verify photo")
+                .setMessage(message + "\n\nYour photo must be verified before saving. "
+                        + "Please check your internet connection and try again.")
+                .setCancelable(false)
+                .setPositiveButton("Try Again", (dialog, which) -> attemptSave())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
     private void showSuspiciousPhotoDialog(AiImageChecker.Result result, String photoBase64,
                                             String foodName, String quantity, String description,
                                             long expiresAt, String pickupLocation, String pickupWindow,
@@ -394,12 +385,6 @@ public class EditFoodPostActivity extends AppCompatActivity {
                         pickupWindow, lat, lng))
                 .show();
     }
-
-    /**
-     * Second, explicit confirmation before overriding an AI warning — makes
-     * clear that doing so gets reported to admin, rather than silently
-     * letting a tap on "Save Anyway" bypass the check.
-     */
     private void confirmPolicyOverride(AiImageChecker.Result result, String photoBase64,
                                         String foodName, String quantity, String description,
                                         long expiresAt, String pickupLocation, String pickupWindow,

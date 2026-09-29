@@ -9,10 +9,6 @@ import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Chat is scoped per accepted request: Firestore path
- * "chats/{requestId}/messages/{messageId}".
- */
 public class ChatRepository {
 
     private static final String CHATS_COLLECTION = "chats";
