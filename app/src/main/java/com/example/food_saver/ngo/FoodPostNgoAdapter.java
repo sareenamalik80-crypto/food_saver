@@ -27,12 +27,9 @@ public class FoodPostNgoAdapter extends RecyclerView.Adapter<FoodPostNgoAdapter.
     private final List<FoodPost> posts = new ArrayList<>();
     private final String myNgoId;
     private final OnPostClickListener listener;
-
-    // NGO's current position, used to show/sort by distance. Null until
-    // location permission is granted and a fix is obtained — distance is
-    // simply hidden until then.
     private Double myLat;
     private Double myLng;
+    private boolean sortByNearby = false;
 
     public FoodPostNgoAdapter(String myNgoId, OnPostClickListener listener) {
         this.myNgoId = myNgoId;
@@ -42,21 +39,28 @@ public class FoodPostNgoAdapter extends RecyclerView.Adapter<FoodPostNgoAdapter.
     public void submitList(List<FoodPost> newPosts) {
         posts.clear();
         posts.addAll(newPosts);
-        sortByDistanceIfKnown();
+        applySort();
         notifyDataSetChanged();
     }
-
-    /** Called once the NGO's GPS location is available — re-sorts nearest-first and shows distance on each card. */
+    public void sortByNewest() {
+        sortByNearby = false;
+        applySort();
+        notifyDataSetChanged();
+    }
     public void setMyLocation(double latitude, double longitude) {
         this.myLat = latitude;
         this.myLng = longitude;
-        sortByDistanceIfKnown();
+        this.sortByNearby = true;
+        applySort();
         notifyDataSetChanged();
     }
 
-    private void sortByDistanceIfKnown() {
-        if (myLat == null || myLng == null) return;
-        posts.sort(Comparator.comparingDouble(this::distanceMetersTo));
+    private void applySort() {
+        if (sortByNearby && myLat != null && myLng != null) {
+            posts.sort(Comparator.comparingDouble(this::distanceMetersTo));
+        } else {
+            posts.sort((a, b) -> Long.compare(b.getPostedAt(), a.getPostedAt()));
+        }
     }
 
     private double distanceMetersTo(FoodPost post) {
@@ -99,12 +103,12 @@ public class FoodPostNgoAdapter extends RecyclerView.Adapter<FoodPostNgoAdapter.
                 .load(imageBytes)
                 .centerCrop()
                 .into(holder.binding.ivFoodImage);
-
-        // Status text is NGO-specific: same post ka status alag dikhta hai
-        // depending on ke request kisne ki thi.
         String label;
         int color;
-        switch (post.getStatus()) {
+        if (post.isExpired()) {
+            label = "Expired";
+            color = R.color.error_red;
+        } else switch (post.getStatus()) {
             case "available":
                 label = "Available";
                 color = R.color.indigo_purple;
@@ -127,7 +131,7 @@ public class FoodPostNgoAdapter extends RecyclerView.Adapter<FoodPostNgoAdapter.
                 color = R.color.green_status;
                 break;
             case "handedOver":
-                label = "Handed Over";
+                label = "Completed";
                 color = R.color.green_status;
                 break;
             default:

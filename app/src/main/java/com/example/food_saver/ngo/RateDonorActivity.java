@@ -21,7 +21,7 @@ public class RateDonorActivity extends AppCompatActivity {
     private String foodId;
     private String donorId;
     private String myNgoId;
-    private String myNgoName = "My NGO"; // apni NGO profile se replace karein
+    private String myNgoName = "My NGO";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
