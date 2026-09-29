@@ -12,7 +12,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.food_saver.databinding.ActivityChatBinding;
+import com.example.food_saver.databinding.ActivityNgoChatBinding;
 import com.example.food_saver.models.ChatMessage;
 import com.example.food_saver.repository.FoodRepository;
 import com.example.food_saver.utils.InsetsHelper;
@@ -22,13 +22,9 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
-
-    // Chat is scoped per accepted request (matches the Donor module's
-    // schema): "chats/{requestId}/messages/{messageId}" — requestId doubles
-    // as the chat thread's id, NOT the foodId.
     public static final String EXTRA_REQUEST_ID = "extra_request_id";
 
-    private ActivityChatBinding binding;
+    private ActivityNgoChatBinding binding;
     private final FoodRepository repository = new FoodRepository();
     private ChatAdapter adapter;
     private ListenerRegistration listener;
@@ -38,17 +34,12 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityChatBinding.inflate(getLayoutInflater());
+        binding = ActivityNgoChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         InsetsHelper.applyStatusBarTopInset(binding.header);
         binding.btnBack.setOnClickListener(v -> finish());
-
-        // Modern Android draws edge-to-edge, so the classic
-        // windowSoftInputMode="adjustResize" no longer physically resizes
-        // the window when the keyboard opens — react to the IME inset
-        // directly so the message input bar always sits above the keyboard.
         int rootBasePadding = binding.getRoot().getPaddingBottom();
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
             Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());

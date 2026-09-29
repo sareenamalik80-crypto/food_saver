@@ -34,11 +34,8 @@ public class NgoDashboardActivity extends AppCompatActivity {
     private final FoodRepository repository = new FoodRepository();
     private FoodPostNgoAdapter adapter;
     private ListenerRegistration[] listeners;
-
-    // The full unfiltered list from Firestore — the search box filters a
-    // copy of this into the adapter rather than mutating it directly, so
-    // clearing the search always restores everything.
     private final List<FoodPost> allPosts = new ArrayList<>();
+    private String myNgoId;
 
     private final ActivityResultLauncher<String> locationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
@@ -58,12 +55,21 @@ public class NgoDashboardActivity extends AppCompatActivity {
 
         InsetsHelper.applyStatusBarTopInset(binding.header);
 
-        String myNgoId = FirebaseAuth.getInstance().getUid();
+        myNgoId = FirebaseAuth.getInstance().getUid();
 
-        String email = (FirebaseAuth.getInstance().getCurrentUser() != null)
-                ? FirebaseAuth.getInstance().getCurrentUser().getEmail()
-                : "NGO";
-        binding.tvWelcome.setText("Welcome, " + email);
+        binding.tvWelcome.setText("Welcome");
+        repository.getNgoProfile(myNgoId, new FoodRepository.ProfileCallback() {
+            @Override
+            public void onProfile(String name, String phone, String address) {
+                if (name != null && !name.isEmpty()) {
+                    binding.tvWelcome.setText("Welcome, " + name);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+            }
+        });
 
         adapter = new FoodPostNgoAdapter(myNgoId, post -> {
             Intent intent = new Intent(this, FoodDetailNgoActivity.class);
@@ -90,6 +96,12 @@ public class NgoDashboardActivity extends AppCompatActivity {
         BottomNavHelper.setup(this, binding.bottomNav, binding.navHome, binding.navHistory,
                 binding.navTransparency, binding.navProfile, BottomNavHelper.Tab.HOME);
 
+        binding.btnRefresh.setOnClickListener(v -> refreshPosts());
+
+        startListening();
+    }
+
+    private void startListening() {
         listeners = repository.listenDashboardPosts(myNgoId, new FoodRepository.PostsCallback() {
             @Override
             public void onPosts(List<FoodPost> posts) {
@@ -106,7 +118,24 @@ public class NgoDashboardActivity extends AppCompatActivity {
         });
     }
 
-    /** Filters allPosts by food name / description (case-insensitive) and pushes the result to the adapter. */
+    private void stopListening() {
+        if (listeners != null) {
+            for (ListenerRegistration l : listeners) {
+                if (l != null) l.remove();
+            }
+            listeners = null;
+        }
+    }
+
+    private void refreshPosts() {
+        binding.btnRefresh.animate().rotationBy(360f).setDuration(500).start();
+        stopListening();
+        allPosts.clear();
+        adapter.sortByNewest();
+        startListening();
+        android.widget.Toast.makeText(this, "Refreshing…", android.widget.Toast.LENGTH_SHORT).show();
+    }
+
     private void applySearchFilter(String query) {
         String needle = query.trim().toLowerCase(Locale.getDefault());
         List<FoodPost> filtered;
@@ -153,10 +182,6 @@ public class NgoDashboardActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (listeners != null) {
-            for (ListenerRegistration l : listeners) {
-                if (l != null) l.remove();
-            }
-        }
+        stopListening();
     }
 }

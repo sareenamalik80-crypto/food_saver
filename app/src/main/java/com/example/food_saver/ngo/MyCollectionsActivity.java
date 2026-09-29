@@ -30,6 +30,7 @@ public class MyCollectionsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         InsetsHelper.applyStatusBarTopInset(binding.header);
+        binding.btnBack.setOnClickListener(v -> finish());
 
         String myNgoId = FirebaseAuth.getInstance().getUid();
 

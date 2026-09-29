@@ -33,10 +33,10 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
 
     private String foodId;
     private String myNgoId;
-    private String myNgoName = "My NGO"; // overwritten once the saved NGO profile loads
+    private String myNgoName = "My NGO";
     private FoodPost currentPost;
     private FoodRequest currentRequest;
-    private String lastRatedDonorId; // avoids re-fetching rating stats on every post update
+    private String lastRatedDonorId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,10 +51,6 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
         myNgoId = FirebaseAuth.getInstance().getUid();
 
         if (myNgoId == null) {
-            // FirebaseAuth session isn't ready yet (or NGO isn't actually
-            // logged in) — proceeding would create a request/claim with a
-            // null ngoId that this NGO could never recognize as "mine"
-            // afterwards. Bail out instead of silently writing broken data.
             Toast.makeText(this, "You're not logged in — please log in again.", Toast.LENGTH_LONG).show();
             finish();
             return;
@@ -70,7 +66,6 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message) {
-                // Keep the "My NGO" fallback — non-critical for this screen.
             }
         });
 
@@ -88,11 +83,6 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
                 Toast.makeText(FoodDetailNgoActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
-        // Dual-confirmation handover: this feeds the "Mark as Received"
-        // button + note, tracked separately from the post since the
-        // confirmation flags live on the linked "requests" document, not
-        // on the FoodPost itself (mirrors the Donor module's design).
         requestListener = repository.listenRequestForPost(foodId, myNgoId, new FoodRepository.RequestCallback() {
             @Override
             public void onRequest(FoodRequest request) {
@@ -102,8 +92,6 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-                // Non-critical for the main screen — the primary post
-                // status/actions above still work without this.
             }
         });
 
@@ -160,13 +148,18 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
 
         switch (post.getStatus()) {
             case "available":
-                binding.tvStatusChip.setText("Available");
-                setActionButton("Request This Food", true, this::onRequestFood);
+                if (post.isExpired()) {
+                    binding.tvStatusChip.setText("Expired");
+                    setActionButton("This Food Has Expired", false, null);
+                } else {
+                    binding.tvStatusChip.setText("Available");
+                    setActionButton("Request This Food", true, this::onRequestFood);
+                }
                 break;
 
             case "requested":
                 if (isMine) {
-                    binding.tvStatusChip.setText("Pending Approval");
+                    binding.tvStatusChip.setText(post.isExpired() ? "Expired" : "Pending Approval");
                     setActionButton("Waiting for Donor's Approval", false, null);
                     binding.btnCancelRequest.setVisibility(View.VISIBLE);
                 } else {
@@ -198,7 +191,7 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
                 break;
 
             case "handedOver":
-                binding.tvStatusChip.setText("Handed Over");
+                binding.tvStatusChip.setText("Completed");
                 if (isMine) {
                     setActionButton("Rate Donor", true, () -> openRateDonor(post));
                 } else {
@@ -207,14 +200,6 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
                 break;
         }
     }
-
-    /**
-     * Dual-confirmation handover UI: shows "Mark as Received" while this
-     * NGO hasn't confirmed yet, or a status note once it has (either
-     * waiting on the donor, or fully complete). Runs independently of
-     * renderPost() because it depends on both the FoodPost's status AND
-     * the linked request's confirmation flags.
-     */
     private void updateHandoverUi() {
         if (currentPost == null) return;
 
@@ -311,8 +296,13 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
     // repository.markCollected(foodId, callback) call kar sakti hain.
 
     private void openDeliveryForm(FoodPost post) {
+        if (currentRequest == null) {
+            Toast.makeText(this, "Please wait a moment and try again.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent intent = new Intent(this, DeliveryDetailsActivity.class);
         intent.putExtra(NgoDashboardActivity.EXTRA_FOOD_ID, post.getFoodId());
+        intent.putExtra(DeliveryDetailsActivity.EXTRA_REQUEST_ID, currentRequest.getRequestId());
         startActivity(intent);
     }
 

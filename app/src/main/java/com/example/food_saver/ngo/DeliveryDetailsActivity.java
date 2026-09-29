@@ -16,9 +16,11 @@ import java.util.Calendar;
 
 public class DeliveryDetailsActivity extends AppCompatActivity {
 
+    public static final String EXTRA_REQUEST_ID = "extra_request_id";
+
     private ActivityDeliveryDetailsBinding binding;
     private final FoodRepository repository = new FoodRepository();
-    private String foodId;
+    private String requestId;
     private String selectedTime = "";
 
     @Override
@@ -30,7 +32,12 @@ public class DeliveryDetailsActivity extends AppCompatActivity {
         InsetsHelper.applyStatusBarTopInset(binding.header);
         binding.btnBack.setOnClickListener(v -> finish());
 
-        foodId = getIntent().getStringExtra(NgoDashboardActivity.EXTRA_FOOD_ID);
+        requestId = getIntent().getStringExtra(EXTRA_REQUEST_ID);
+        if (requestId == null) {
+            Toast.makeText(this, "Something went wrong — missing request.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         binding.etTimeOfArrival.setOnClickListener(v -> showTimePicker());
 
@@ -62,7 +69,7 @@ public class DeliveryDetailsActivity extends AppCompatActivity {
         DeliveryDetails details = new DeliveryDetails(riderName, riderPhone, vehicleNumber,
                 selectedTime, System.currentTimeMillis());
 
-        repository.saveDeliveryDetails(foodId, details, new FoodRepository.SimpleCallback() {
+        repository.saveDeliveryDetails(requestId, details, new FoodRepository.SimpleCallback() {
             @Override
             public void onSuccess() {
                 Toast.makeText(DeliveryDetailsActivity.this, "Delivery details saved", Toast.LENGTH_SHORT).show();

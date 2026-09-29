@@ -9,24 +9,25 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.food_saver.auth.LoginActivity;
-import com.example.food_saver.databinding.ActivityProfileBinding;
+import com.example.food_saver.databinding.ActivityNgoProfileBinding;
 import com.example.food_saver.repository.FoodRepository;
 import com.example.food_saver.utils.InsetsHelper;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private ActivityProfileBinding binding;
+    private ActivityNgoProfileBinding binding;
     private final FoodRepository repository = new FoodRepository();
     private String myNgoId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityProfileBinding.inflate(getLayoutInflater());
+        binding = ActivityNgoProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         InsetsHelper.applyStatusBarTopInset(binding.header);
+        binding.btnBack.setOnClickListener(v -> finish());
 
         myNgoId = FirebaseAuth.getInstance().getUid();
 

@@ -25,6 +25,7 @@ public class TransparencyDashboardActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         InsetsHelper.applyStatusBarTopInset(binding.header);
+        binding.btnBack.setOnClickListener(v -> finish());
 
         BottomNavHelper.setup(this, binding.bottomNav, binding.navHome, binding.navHistory,
                 binding.navTransparency, binding.navProfile, BottomNavHelper.Tab.TRANSPARENCY);
