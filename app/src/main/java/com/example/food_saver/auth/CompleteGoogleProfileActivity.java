@@ -1,5 +1,6 @@
 package com.example.food_saver.auth;
 
+import com.example.food_saver.utils.ValidationUtils;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -85,8 +86,11 @@ public class CompleteGoogleProfileActivity extends AppCompatActivity {
         String phone = binding.etPhone.getText().toString().trim();
         String address = binding.etAddress.getText().toString().trim();
 
-        if (TextUtils.isEmpty(phone) || TextUtils.isEmpty(address)) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+        ValidationUtils.Form form = new ValidationUtils.Form()
+                .check(binding.etPhone, ValidationUtils.phone(phone))
+                .check(binding.etAddress, ValidationUtils.address("Address", address));
+        if (!form.isValid()) {
+            Toast.makeText(this, "Please correct the highlighted fields", Toast.LENGTH_SHORT).show();
             return;
         }
 

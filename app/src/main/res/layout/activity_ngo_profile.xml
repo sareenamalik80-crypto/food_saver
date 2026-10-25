@@ -123,6 +123,7 @@
 
                 <EditText
                     android:id="@+id/etNgoName"
+                    android:maxLength="50"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
@@ -132,6 +133,7 @@
 
                 <EditText
                     android:id="@+id/etPhone"
+                    android:maxLength="13"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
@@ -142,6 +144,7 @@
 
                 <EditText
                     android:id="@+id/etAddress"
+                    android:maxLength="200"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"

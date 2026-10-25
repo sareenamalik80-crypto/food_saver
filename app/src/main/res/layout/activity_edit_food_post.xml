@@ -137,6 +137,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etFoodTitle"
+                    android:maxLength="50"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Food Name" />
@@ -152,6 +153,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etQuantity"
+                    android:maxLength="30"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Quantity" />
@@ -167,6 +169,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDescription"
+                    android:maxLength="300"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Description (optional)"
@@ -210,6 +213,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPickupLocation"
+                    android:maxLength="200"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Pickup Location / Address" />
@@ -227,7 +231,7 @@
                     android:id="@+id/etPickupWindow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Pickup Time Window" />
+                    android:hint="Pickup Time Window (tap to select)" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button

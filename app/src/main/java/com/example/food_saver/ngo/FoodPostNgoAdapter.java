@@ -127,7 +127,7 @@ public class FoodPostNgoAdapter extends RecyclerView.Adapter<FoodPostNgoAdapter.
                 color = R.color.green_status;
                 break;
             case "collected":
-                label = "Food Collected";
+                label = "Handed Over by Donor";
                 color = R.color.green_status;
                 break;
             case "handedOver":

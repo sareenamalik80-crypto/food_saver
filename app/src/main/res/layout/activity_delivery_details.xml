@@ -52,11 +52,26 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <TextView
+            android:id="@+id/tvPickupWindowInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_card"
+            android:backgroundTint="@color/soft_lavender"
+            android:padding="12dp"
+            android:text="Loading donor's pickup time..."
+            android:textColor="@color/brown_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
         <EditText
             android:id="@+id/etRiderName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Rider Name"
+            android:inputType="textPersonName|textCapWords"
+            android:maxLength="50"
             android:background="@drawable/bg_card"
             android:padding="12dp"
             android:layout_marginBottom="12dp" />
@@ -65,8 +80,9 @@
             android:id="@+id/etRiderPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Rider Mobile Number"
+            android:hint="Rider Mobile Number (e.g. 03001234567)"
             android:inputType="phone"
+            android:maxLength="13"
             android:background="@drawable/bg_card"
             android:padding="12dp"
             android:layout_marginBottom="12dp" />
@@ -75,7 +91,9 @@
             android:id="@+id/etVehicleNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Vehicle Number"
+            android:hint="Vehicle Number (e.g. RIM-1234)"
+            android:inputType="textCapCharacters"
+            android:maxLength="12"
             android:background="@drawable/bg_card"
             android:padding="12dp"
             android:layout_marginBottom="12dp" />
@@ -84,11 +102,20 @@
             android:id="@+id/etTimeOfArrival"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Time of Arrival (e.g. 6:30 PM)"
+            android:hint="Time of Arrival (tap to select)"
             android:focusable="false"
             android:background="@drawable/bg_card"
             android:padding="12dp"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/tvArrivalError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            android:textColor="@color/error_red"
+            android:textSize="13sp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btnSaveDelivery"

@@ -69,6 +69,7 @@
 
         <EditText
             android:id="@+id/etSearch"
+            android:maxLength="50"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"

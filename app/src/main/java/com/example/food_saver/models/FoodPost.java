@@ -8,6 +8,7 @@ public class FoodPost {
     public static final String STATUS_APPROVED = "approved";
     public static final String STATUS_COLLECTED = "collected";
     public static final String STATUS_HANDED_OVER = "handedOver";
+    public static final String STATUS_EXPIRED = "expired";
 
     private String foodId;
     private String donorId;
@@ -106,7 +107,9 @@ public class FoodPost {
     /** Past its expiry date and never picked up (available / waiting for approval). */
     @Exclude
     public boolean isExpired() {
-        boolean open = STATUS_AVAILABLE.equals(status) || STATUS_REQUESTED.equals(status);
+        if (STATUS_EXPIRED.equals(status)) return true;
+        boolean open = STATUS_AVAILABLE.equals(status) || STATUS_REQUESTED.equals(status)
+                || STATUS_APPROVED.equals(status);
         return open && expiresAt > 0 && System.currentTimeMillis() > expiresAt;
     }
 
@@ -119,6 +122,6 @@ public class FoodPost {
     /** Only a post nobody has requested yet may be deleted by its donor. */
     @Exclude
     public boolean isDeletable() {
-        return STATUS_AVAILABLE.equals(status);
+        return STATUS_AVAILABLE.equals(status) || STATUS_EXPIRED.equals(status);
     }
 }

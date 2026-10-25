@@ -16,6 +16,7 @@ import com.example.food_saver.databinding.ActivitySignupBinding;
 import com.example.food_saver.utils.InsetsHelper;
 import com.example.food_saver.models.User;
 import com.example.food_saver.utils.ImageUtils;
+import com.example.food_saver.utils.ValidationUtils;
 
 import java.io.IOException;
 
@@ -79,19 +80,18 @@ public class SignUpActivity extends AppCompatActivity {
     private void attemptSignUp() {
         String name = binding.etName.getText().toString().trim();
         String email = binding.etEmail.getText().toString().trim();
-        String password = binding.etPassword.getText().toString().trim();
+        String password = binding.etPassword.getText().toString();
         String phone = binding.etPhone.getText().toString().trim();
         String address = binding.etAddress.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email) ||
-                TextUtils.isEmpty(password) || TextUtils.isEmpty(phone) ||
-                TextUtils.isEmpty(address)) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (password.length() < 6) {
-            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+        ValidationUtils.Form form = new ValidationUtils.Form()
+                .check(binding.etName, ValidationUtils.orgName("Name", name))
+                .check(binding.etEmail, ValidationUtils.email(email))
+                .check(binding.etPhone, ValidationUtils.phone(phone))
+                .check(binding.etAddress, ValidationUtils.address("Address", address))
+                .check(binding.etPassword, ValidationUtils.newPassword(password));
+        if (!form.isValid()) {
+            Toast.makeText(this, "Please correct the highlighted fields", Toast.LENGTH_SHORT).show();
             return;
         }
 

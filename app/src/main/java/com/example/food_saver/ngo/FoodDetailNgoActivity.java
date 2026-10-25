@@ -1,8 +1,11 @@
 package com.example.food_saver.ngo;
 import com.example.food_saver.utils.ImageUtils;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Toast;
@@ -16,7 +19,9 @@ import com.example.food_saver.databinding.ActivityFoodDetailNgoBinding;
 import com.example.food_saver.models.FoodPost;
 import com.example.food_saver.models.FoodRequest;
 import com.example.food_saver.repository.FoodRepository;
+import com.example.food_saver.utils.ExpiryHelper;
 import com.example.food_saver.utils.InsetsHelper;
+import com.example.food_saver.utils.TimeUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
@@ -37,6 +42,14 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
     private FoodPost currentPost;
     private FoodRequest currentRequest;
     private String lastRatedDonorId;
+    private final Handler refreshHandler = new Handler(Looper.getMainLooper());
+    private final Runnable refreshTick = new Runnable() {
+        @Override
+        public void run() {
+            updateHandoverUi();
+            refreshHandler.postDelayed(this, 30_000);
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,6 +86,7 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
             @Override
             public void onPost(FoodPost post) {
                 currentPost = post;
+                ExpiryHelper.expireIfNeeded(post);
                 renderPost(post);
                 updateHandoverUi();
                 loadDonorRatingIfNeeded(post.getDonorId());
@@ -87,6 +101,7 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
             @Override
             public void onRequest(FoodRequest request) {
                 currentRequest = request;
+                if (currentPost != null) renderPost(currentPost);
                 updateHandoverUi();
             }
 
@@ -146,7 +161,13 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
         binding.btnOpenChat.setVisibility(View.GONE);
         binding.btnCancelRequest.setVisibility(View.GONE);
 
-        switch (post.getStatus()) {
+        String status = post.isExpired() ? "expired" : post.getStatus();
+        switch (status) {
+            case "expired":
+                binding.tvStatusChip.setText("Expired");
+                setActionButton(isMine ? "This Donation Expired Before Pickup" : "This Food Has Expired", false, null);
+                break;
+
             case "available":
                 if (post.isExpired()) {
                     binding.tvStatusChip.setText("Expired");
@@ -173,18 +194,20 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
                 if (isMine) {
                     binding.btnOpenChat.setVisibility(View.VISIBLE);
                     binding.btnOpenChat.setOnClickListener(v -> openChat(post));
-                    setActionButton("Fill Delivery Details", true, () -> openDeliveryForm(post));
+                    boolean filled = currentRequest != null && currentRequest.hasDeliveryDetails();
+                    setActionButton(filled ? "Update Delivery Details" : "Fill Delivery Details", true,
+                            () -> openDeliveryForm(post));
                 } else {
                     setActionButton("Claimed by Another NGO", false, null);
                 }
                 break;
 
             case "collected":
-                binding.tvStatusChip.setText("Food Collected");
+                binding.tvStatusChip.setText("Handed Over by Donor");
                 if (isMine) {
                     binding.btnOpenChat.setVisibility(View.VISIBLE);
                     binding.btnOpenChat.setOnClickListener(v -> openChat(post));
-                    setActionButton("Awaiting Handover Confirmation", false, null);
+                    setActionButton("Donor Has Handed Over the Food", false, null);
                 } else {
                     setActionButton("Collected by Another NGO", false, null);
                 }
@@ -206,7 +229,8 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
         boolean isMine = myNgoId != null && myNgoId.equals(currentPost.getClaimedByNgoId());
         String status = currentPost.getStatus();
         boolean isDone = "handedOver".equals(status);
-        boolean isActive = isMine && ("approved".equals(status) || "collected".equals(status) || isDone);
+        boolean isActive = isMine && !currentPost.isExpired()
+                && ("approved".equals(status) || "collected".equals(status) || isDone);
 
         if (!isActive || currentRequest == null) {
             binding.btnMarkReceived.setVisibility(View.GONE);
@@ -215,36 +239,69 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
         }
 
         boolean ngoConfirmed = currentRequest.isNgoConfirmedReceived();
+        boolean donorHandedOver = currentRequest.isDonorConfirmedHandover();
+        boolean arrivalReached = TimeUtils.hasArrivalTimePassed(currentRequest.getArrivalAt());
         boolean canConfirm = !isDone && !ngoConfirmed;
-        boolean showNote = ngoConfirmed || isDone;
+        boolean readyToConfirm = canConfirm && donorHandedOver && arrivalReached;
 
         binding.btnMarkReceived.setVisibility(canConfirm ? View.VISIBLE : View.GONE);
-        binding.tvHandoverNote.setVisibility(showNote ? View.VISIBLE : View.GONE);
+        binding.btnMarkReceived.setAlpha(readyToConfirm ? 1f : 0.5f);
 
-        if (showNote) {
-            if (isDone) {
-                binding.tvHandoverNote.setText("\u2705 Handover complete");
-                binding.tvHandoverNote.setTextColor(getColor(R.color.success_green));
-            } else {
-                binding.tvHandoverNote.setText("You confirmed \u2014 waiting for the donor to confirm handover");
-                binding.tvHandoverNote.setTextColor(getColor(R.color.gray_secondary));
-            }
+        String note = null;
+        int noteColor = R.color.gray_secondary;
+        if (isDone) {
+            note = "\u2705 Handover complete";
+            noteColor = R.color.success_green;
+        } else if (!currentRequest.hasDeliveryDetails()) {
+            note = "Fill in the delivery details first";
+        } else if (!arrivalReached) {
+            note = "You can mark as received after the rider's arrival time (" + currentRequest.getArrivalTime() + ")";
+        } else if (!donorHandedOver) {
+            note = "Waiting for the donor to press Handover";
+        }
+        binding.tvHandoverNote.setVisibility(note != null ? View.VISIBLE : View.GONE);
+        if (note != null) {
+            binding.tvHandoverNote.setText(note);
+            binding.tvHandoverNote.setTextColor(getColor(noteColor));
         }
     }
 
     private void onMarkReceived() {
         if (currentRequest == null) return;
+        if (!currentRequest.hasDeliveryDetails()) {
+            showInfo("Delivery details missing", "Please fill in the rider's delivery details first.");
+            return;
+        }
+        if (!TimeUtils.hasArrivalTimePassed(currentRequest.getArrivalAt())) {
+            showInfo("Too early", "You can mark the food as received only after the rider's arrival time ("
+                    + currentRequest.getArrivalTime() + ").");
+            return;
+        }
+        if (!currentRequest.isDonorConfirmedHandover()) {
+            showInfo("Not handed over yet", "The donor hasn't handed over the food yet. "
+                    + "You can mark it as received after the donor presses Handover.");
+            return;
+        }
         repository.markReceivedByNgo(currentRequest.getRequestId(), foodId, new FoodRepository.SimpleCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(FoodDetailNgoActivity.this, "Marked as received", Toast.LENGTH_SHORT).show();
+                Toast.makeText(FoodDetailNgoActivity.this, "Marked as received — donation completed", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onError(String message) {
-                Toast.makeText(FoodDetailNgoActivity.this, message, Toast.LENGTH_SHORT).show();
+                showInfo("Couldn't mark as received", message);
             }
         });
+    }
+
+    private void showInfo(String title, String message) {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     private void onCancelRequest() {
@@ -323,6 +380,18 @@ public class FoodDetailNgoActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_DONOR_NAME, post.getDonorName());
         intent.putExtra(RateDonorActivity.EXTRA_DONOR_ID, post.getDonorId());   // 👈 yeh nayi line add karein
         startActivity(intent);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        refreshHandler.postDelayed(refreshTick, 30_000);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        refreshHandler.removeCallbacks(refreshTick);
     }
 
     @Override

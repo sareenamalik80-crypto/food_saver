@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.food_saver.R;
 import com.example.food_saver.databinding.ActivityLoginBinding;
 import com.example.food_saver.utils.InsetsHelper;
+import com.example.food_saver.utils.ValidationUtils;
 import com.example.food_saver.donor.DonorHomeActivity;
 import com.example.food_saver.ngo.NgoDashboardActivity;
 import com.example.food_saver.models.User;
@@ -124,8 +125,9 @@ public class LoginActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Send Link", (dialog, which) -> {
                     String email = input.getText().toString().trim();
-                    if (TextUtils.isEmpty(email)) {
-                        Toast.makeText(this, "Enter your email first.", Toast.LENGTH_SHORT).show();
+                    String emailError = ValidationUtils.email(email);
+                    if (emailError != null) {
+                        Toast.makeText(this, emailError, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     authRepository.sendPasswordReset(email, new AuthRepository.SimpleCallback() {
@@ -172,8 +174,10 @@ public class LoginActivity extends AppCompatActivity {
         String email = binding.etEmail.getText().toString().trim();
         String password = binding.etPassword.getText().toString().trim();
 
-        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(this, "Enter email and password", Toast.LENGTH_SHORT).show();
+        ValidationUtils.Form form = new ValidationUtils.Form()
+                .check(binding.etEmail, ValidationUtils.email(email))
+                .check(binding.etPassword, ValidationUtils.loginPassword(password));
+        if (!form.isValid()) {
             return;
         }
 

@@ -5,6 +5,7 @@ import com.example.food_saver.models.DeliveryDetails;
 import com.example.food_saver.models.FoodPost;
 import com.example.food_saver.models.FoodRequest;
 import com.example.food_saver.models.Rating;
+import com.example.food_saver.utils.ExpiryHelper;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -17,16 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Poore NGO module ka Firestore layer yahin se guzarta hai.
- * Collections:
- *   foodPosts/{foodId}
- *   foodPosts/{foodId}/chats/{messageId}
- *   foodPosts/{foodId}/delivery/details   (single doc)
- *   requests/{requestId}
- *   ratings/{ratingId}
- *   ngos/{ngoId}   (profile: name, phone, address)
- */
+
 public class FoodRepository {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -77,7 +69,7 @@ public class FoodRepository {
                         availablePosts.clear();
                         for (DocumentSnapshot doc : snapshots.getDocuments()) {
                             FoodPost post = doc.toObject(FoodPost.class);
-                            if (post != null) { post.setFoodId(doc.getId()); availablePosts.put(doc.getId(), post); }
+                            if (post != null) { post.setFoodId(doc.getId()); ExpiryHelper.expireIfNeeded(post); availablePosts.put(doc.getId(), post); }
                         }
                         callback.onPosts(mergePosts(availablePosts, myPosts));
                     }
@@ -91,7 +83,7 @@ public class FoodRepository {
                         myPosts.clear();
                         for (DocumentSnapshot doc : snapshots.getDocuments()) {
                             FoodPost post = doc.toObject(FoodPost.class);
-                            if (post != null) { post.setFoodId(doc.getId()); myPosts.put(doc.getId(), post); }
+                            if (post != null) { post.setFoodId(doc.getId()); ExpiryHelper.expireIfNeeded(post); myPosts.put(doc.getId(), post); }
                         }
                         callback.onPosts(mergePosts(availablePosts, myPosts));
                     }
@@ -104,6 +96,22 @@ public class FoodRepository {
         merged.putAll(mine);
         return new ArrayList<>(merged.values());
     }
+    public void getPost(String foodId, SinglePostCallback callback) {
+        db.collection("foodPosts").document(foodId).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc != null && doc.exists()) {
+                        FoodPost post = doc.toObject(FoodPost.class);
+                        if (post != null) {
+                            post.setFoodId(doc.getId());
+                            callback.onPost(post);
+                            return;
+                        }
+                    }
+                    callback.onError(new Exception("Food post not found"));
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
     public ListenerRegistration listenPost(String foodId, SinglePostCallback callback) {
         return db.collection("foodPosts").document(foodId)
                 .addSnapshotListener((doc, e) -> {
@@ -159,9 +167,7 @@ public class FoodRepository {
                 });
     }
 
-    // CANCEL REQUEST — NGO changes its mind before the donor responds.
-    // Reverts the FoodPost back to "available" and clears the claim, so
-    // other NGOs can request it again.
+
     public void cancelRequest(String requestId, String foodPostId, SimpleCallback callback) {
         DocumentReference requestRef = db.collection("requests").document(requestId);
         DocumentReference postRef = db.collection("foodPosts").document(foodPostId);
@@ -215,30 +221,40 @@ public class FoodRepository {
         db.runTransaction(transaction -> {
                     DocumentSnapshot requestSnapshot = transaction.get(requestRef);
                     Boolean donorConfirmed = requestSnapshot.getBoolean("donorConfirmedHandover");
-                    boolean donorAlreadyConfirmed = donorConfirmed != null && donorConfirmed;
-
-                    if (donorAlreadyConfirmed) {
-                        Map<String, Object> requestUpdate = new HashMap<>();
-                        requestUpdate.put("ngoConfirmedReceived", true);
-                        requestUpdate.put("status", "handedOver");
-                        transaction.update(requestRef, requestUpdate);
-                        transaction.update(postRef, "status", "handedOver");
-                    } else {
-                        Map<String, Object> requestUpdate = new HashMap<>();
-                        requestUpdate.put("ngoConfirmedReceived", true);
-                        requestUpdate.put("status", "collected");
-                        transaction.update(requestRef, requestUpdate);
+                    if (donorConfirmed == null || !donorConfirmed) {
+                        throw new RuntimeException("NOT_HANDED_OVER");
                     }
+                    Long arrivalAt = requestSnapshot.getLong("arrivalAt");
+                    if (arrivalAt != null && arrivalAt > 0 && System.currentTimeMillis() < arrivalAt) {
+                        throw new RuntimeException("TOO_EARLY");
+                    }
+
+                    Map<String, Object> requestUpdate = new HashMap<>();
+                    requestUpdate.put("ngoConfirmedReceived", true);
+                    requestUpdate.put("status", "handedOver");
+                    transaction.update(requestRef, requestUpdate);
+                    transaction.update(postRef, "status", "handedOver");
                     return null;
                 }).addOnSuccessListener(unused -> callback.onSuccess())
-                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                .addOnFailureListener(e -> {
+                    String code = e.getMessage() != null ? e.getMessage() : "";
+                    if (code.contains("NOT_HANDED_OVER")) {
+                        callback.onError("The donor hasn't handed over the food yet. You can mark it as received after the donor presses Handover.");
+                    } else if (code.contains("TOO_EARLY")) {
+                        callback.onError("You can mark the food as received only after the rider's arrival time.");
+                    } else {
+                        callback.onError(e.getMessage());
+                    }
+                });
     }
+
     public void saveDeliveryDetails(String requestId, DeliveryDetails details, SimpleCallback callback) {
         java.util.Map<String, Object> updates = new java.util.HashMap<>();
         updates.put("riderName", details.getRiderName());
         updates.put("riderPhone", details.getRiderPhone());
         updates.put("vehicleNumber", details.getVehicleNumber());
         updates.put("arrivalTime", details.getTimeOfArrival());
+        updates.put("arrivalAt", details.getArrivalAt());
 
         db.collection("requests").document(requestId)
                 .update(updates)

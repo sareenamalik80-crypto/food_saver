@@ -112,6 +112,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDonorName"
+                    android:maxLength="50"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Your Name / Restaurant Name" />
@@ -127,6 +128,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etFoodTitle"
+                    android:maxLength="50"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Food Name (e.g. Cooked Rice &amp; Curry)" />
@@ -142,6 +144,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etQuantity"
+                    android:maxLength="30"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Quantity (e.g. 10 kg or 20 plates)" />
@@ -157,6 +160,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDescription"
+                    android:maxLength="300"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Description (optional — e.g. packed in trays)"
@@ -200,6 +204,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPickupLocation"
+                    android:maxLength="200"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Pickup Location / Address (or use GPS above)" />
@@ -217,7 +222,7 @@
                     android:id="@+id/etPickupWindow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Pickup Time Window (e.g. 5 PM - 8 PM)" />
+                    android:hint="Pickup Time Window (tap to select)" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button

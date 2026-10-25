@@ -55,4 +55,18 @@ public class FoodRequest {
 
     public boolean isNgoConfirmedReceived() { return ngoConfirmedReceived; }
     public void setNgoConfirmedReceived(boolean ngoConfirmedReceived) { this.ngoConfirmedReceived = ngoConfirmedReceived; }
+
+    private String arrivalTime;
+    private long arrivalAt;
+
+    public String getArrivalTime() { return arrivalTime; }
+    public void setArrivalTime(String arrivalTime) { this.arrivalTime = arrivalTime; }
+
+    public long getArrivalAt() { return arrivalAt; }
+    public void setArrivalAt(long arrivalAt) { this.arrivalAt = arrivalAt; }
+
+    @com.google.firebase.firestore.Exclude
+    public boolean hasDeliveryDetails() {
+        return arrivalTime != null && !arrivalTime.isEmpty();
+    }
 }

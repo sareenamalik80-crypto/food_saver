@@ -12,6 +12,7 @@ import com.example.food_saver.R;
 import com.example.food_saver.databinding.ItemRequestBinding;
 import com.example.food_saver.models.Request;
 import com.example.food_saver.utils.ImageUtils;
+import com.example.food_saver.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
             // collection itself doesn't store these.
             binding.tvFoodTitle.setText(request.getFoodName() != null ? request.getFoodName() : "Food item");
             binding.tvNgoName.setText("From: " + request.getNgoName());
-            binding.tvStatus.setText(capitalize(request.getStatus()));
+            binding.tvStatus.setText(statusLabel(request.getStatus()));
 
             byte[] imageBytes = ImageUtils.decodeBase64ToBytes(request.getFoodImageBase64());
             Glide.with(binding.getRoot().getContext())
@@ -78,11 +79,18 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
                     .centerCrop()
                     .into(binding.ivFoodPhoto);
 
-            boolean isPending = Request.STATUS_REQUESTED.equals(request.getStatus());
+            boolean isExpired = "expired".equals(request.getStatus())
+                    || (request.isFoodExpired()
+                    && (Request.STATUS_REQUESTED.equals(request.getStatus())
+                    || Request.STATUS_APPROVED.equals(request.getStatus())));
+            if (isExpired) {
+                binding.tvStatus.setText("Expired");
+            }
+            boolean isPending = !isExpired && Request.STATUS_REQUESTED.equals(request.getStatus());
             boolean isDone = Request.STATUS_HANDED_OVER.equals(request.getStatus());
-            boolean isApproved = Request.STATUS_APPROVED.equals(request.getStatus())
+            boolean isApproved = !isExpired && (Request.STATUS_APPROVED.equals(request.getStatus())
                     || Request.STATUS_COLLECTED.equals(request.getStatus())
-                    || isDone;
+                    || isDone);
 
             binding.actionsPending.setVisibility(isPending ? View.VISIBLE : View.GONE);
             binding.btnChat.setVisibility(isApproved ? View.VISIBLE : View.GONE);
@@ -96,25 +104,34 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
                 binding.tvArrivalTime.setText("Arrival: " + request.getArrivalTime());
             }
 
-            // Dual-confirmation handover: show the button only while approved
-            // AND the donor hasn't confirmed yet; show the note once the
-            // donor has confirmed (whether still waiting, or fully done).
-            boolean canConfirm = isApproved && !isDone && !request.isDonorConfirmedHandover();
-            boolean showNote = isApproved && (request.isDonorConfirmedHandover() || isDone);
+            boolean donorConfirmed = request.isDonorConfirmedHandover();
+            boolean hasRider = request.hasDeliveryDetails();
+            boolean arrivalReached = TimeUtils.hasArrivalTimePassed(request.getArrivalAt());
+            boolean canConfirm = isApproved && !isDone && !donorConfirmed;
+            boolean readyToConfirm = canConfirm && hasRider && arrivalReached;
 
             binding.btnMarkHandedOver.setVisibility(canConfirm ? View.VISIBLE : View.GONE);
-            binding.tvHandoverNote.setVisibility(showNote ? View.VISIBLE : View.GONE);
+            binding.btnMarkHandedOver.setAlpha(readyToConfirm ? 1f : 0.5f);
 
-            if (showNote) {
-                if (isDone) {
-                    binding.tvHandoverNote.setText("✅ Handover complete");
-                    binding.tvHandoverNote.setTextColor(
-                            binding.getRoot().getContext().getColor(R.color.success_green));
-                } else {
-                    binding.tvHandoverNote.setText("You confirmed — waiting for the NGO to confirm receipt");
-                    binding.tvHandoverNote.setTextColor(
-                            binding.getRoot().getContext().getColor(R.color.text_muted));
-                }
+            String note = null;
+            int noteColor = R.color.text_muted;
+            if (isExpired) {
+                note = "This donation expired before it was picked up";
+                noteColor = R.color.error_red;
+            } else if (isDone) {
+                note = "✅ Handover complete";
+                noteColor = R.color.success_green;
+            } else if (isApproved && donorConfirmed) {
+                note = "You handed over the food — waiting for the NGO to mark it as received";
+            } else if (canConfirm && !hasRider) {
+                note = "Waiting for the NGO to add the rider details";
+            } else if (canConfirm && !arrivalReached) {
+                note = "You can press Handover after the rider's arrival time (" + request.getArrivalTime() + ")";
+            }
+            binding.tvHandoverNote.setVisibility(note != null ? View.VISIBLE : View.GONE);
+            if (note != null) {
+                binding.tvHandoverNote.setText(note);
+                binding.tvHandoverNote.setTextColor(binding.getRoot().getContext().getColor(noteColor));
             }
 
             binding.btnAccept.setOnClickListener(v -> {
@@ -131,9 +148,17 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
             });
         }
 
-        private String capitalize(String s) {
-            if (s == null || s.isEmpty()) return "";
-            return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+        private String statusLabel(String status) {
+            if (status == null || status.isEmpty()) return "";
+            switch (status) {
+                case Request.STATUS_REQUESTED: return "Requested";
+                case Request.STATUS_APPROVED: return "Approved";
+                case Request.STATUS_COLLECTED: return "Handed Over";
+                case Request.STATUS_HANDED_OVER: return "Completed";
+                case Request.STATUS_REJECTED: return "Rejected";
+                case "expired": return "Expired";
+                default: return Character.toUpperCase(status.charAt(0)) + status.substring(1);
+            }
         }
     }
 }

@@ -23,10 +23,12 @@ public class Request {
     private String vehicleNumber;
     private String riderPhone;
     private String arrivalTime;
+    private long arrivalAt;
     private boolean donorConfirmedHandover;
     private boolean ngoConfirmedReceived;
     private String foodName;
     private String foodImageBase64;
+    private boolean foodExpired;
     public Request() {
     }
 
@@ -72,9 +74,16 @@ public class Request {
     public String getArrivalTime() { return arrivalTime; }
     public void setArrivalTime(String arrivalTime) { this.arrivalTime = arrivalTime; }
 
+    public long getArrivalAt() { return arrivalAt; }
+    public void setArrivalAt(long arrivalAt) { this.arrivalAt = arrivalAt; }
+
     @Exclude
     public String getFoodName() { return foodName; }
     public void setFoodName(String foodName) { this.foodName = foodName; }
+
+    @Exclude
+    public boolean isFoodExpired() { return foodExpired; }
+    public void setFoodExpired(boolean foodExpired) { this.foodExpired = foodExpired; }
 
     @Exclude
     public String getFoodImageBase64() { return foodImageBase64; }

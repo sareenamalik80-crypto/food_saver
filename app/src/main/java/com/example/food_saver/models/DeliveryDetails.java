@@ -7,6 +7,7 @@ public class DeliveryDetails {
     private String vehicleNumber;
     private String timeOfArrival;
     private long filledAt;
+    private long arrivalAt;
 
     public DeliveryDetails() {}
 
@@ -33,4 +34,7 @@ public class DeliveryDetails {
 
     public long getFilledAt() { return filledAt; }
     public void setFilledAt(long filledAt) { this.filledAt = filledAt; }
+
+    public long getArrivalAt() { return arrivalAt; }
+    public void setArrivalAt(long arrivalAt) { this.arrivalAt = arrivalAt; }
 }

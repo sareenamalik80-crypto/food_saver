@@ -1,5 +1,6 @@
 package com.example.food_saver.donor;
 
+import com.example.food_saver.utils.ValidationUtils;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Toast;
@@ -73,6 +74,10 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage() {
         String text = binding.etMessageInput.getText().toString().trim();
         if (TextUtils.isEmpty(text)) return;
+        if (text.length() > ValidationUtils.MESSAGE_MAX) {
+            ValidationUtils.show(binding.etMessageInput, "Message can't be longer than " + ValidationUtils.MESSAGE_MAX + " characters");
+            return;
+        }
 
         binding.etMessageInput.setText("");
         chatRepository.sendMessage(requestId, text, new ChatRepository.SendCallback() {
