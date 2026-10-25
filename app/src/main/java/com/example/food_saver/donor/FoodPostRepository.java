@@ -108,7 +108,7 @@ public class FoodPostRepository {
                 firestore.collection(POSTS_COLLECTION).document(foodId);
         firestore.runTransaction(transaction -> {
                     String status = transaction.get(ref).getString("status");
-                    if (!"available".equals(status)) {
+                    if (!"available".equals(status) && !"expired".equals(status)) {
                         throw new RuntimeException("NOT_DELETABLE");
                     }
                     transaction.delete(ref);
@@ -143,6 +143,8 @@ public class FoodPostRepository {
                 for (var doc : snapshots.getDocuments()) {
                     FoodPost post = doc.toObject(FoodPost.class);
                     if (post != null) {
+                        if (post.getFoodId() == null) post.setFoodId(doc.getId());
+                        com.example.food_saver.utils.ExpiryHelper.expireIfNeeded(post);
                         posts.add(post);
                     }
                 }
@@ -178,30 +180,5 @@ public class FoodPostRepository {
                     callback.onStats(average, count);
                 })
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
-    }
-
-    /**
-     * Records that this donor chose to post despite the AI photo check
-     * flagging it (not real food / AI-generated / screenshot). Written to
-     * its own "policyViolations" collection so admin can review it and
-     * decide whether to flag the donor's account — this call never blocks
-     * or fails the actual food post upload; it's fire-and-forget logging.
-     */
-    public void reportPolicyViolation(String donorName, String foodName, String aiReason,
-                                       boolean isRealFood, boolean isAiGenerated, boolean isScreenshot) {
-        if (auth.getCurrentUser() == null) return;
-
-        Map<String, Object> violation = new HashMap<>();
-        violation.put("donorId", auth.getCurrentUser().getUid());
-        violation.put("donorName", donorName);
-        violation.put("foodName", foodName);
-        violation.put("aiReason", aiReason);
-        violation.put("isRealFood", isRealFood);
-        violation.put("isAiGenerated", isAiGenerated);
-        violation.put("isScreenshot", isScreenshot);
-        violation.put("timestamp", System.currentTimeMillis());
-        violation.put("reviewed", false);
-
-        firestore.collection("policyViolations").document().set(violation);
     }
 }

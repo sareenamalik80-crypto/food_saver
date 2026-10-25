@@ -3,6 +3,7 @@ package com.example.food_saver.donor;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -28,6 +29,8 @@ import com.example.food_saver.utils.AiImageChecker;
 import com.example.food_saver.utils.InsetsHelper;
 import com.example.food_saver.utils.ImageUtils;
 import com.example.food_saver.utils.LocationHelper;
+import com.example.food_saver.utils.TimeUtils;
+import com.example.food_saver.utils.ValidationUtils;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.IOException;
@@ -49,6 +52,8 @@ public class PostFoodActivity extends AppCompatActivity {
     private long selectedExpiresAtMillis = -1L;
     private double pickupLat = 0.0;
     private double pickupLng = 0.0;
+    private int pickupStartMin = -1;
+    private int pickupEndMin = -1;
 
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
@@ -82,6 +87,9 @@ public class PostFoodActivity extends AppCompatActivity {
 
         binding.etExpiryDate.setFocusable(false);
         binding.etExpiryDate.setOnClickListener(v -> showDatePicker());
+
+        binding.etPickupWindow.setFocusable(false);
+        binding.etPickupWindow.setOnClickListener(v -> showPickupWindowPicker());
 
         binding.btnUseLocation.setOnClickListener(v -> checkLocationPermissionAndFetch());
 
@@ -212,6 +220,7 @@ public class PostFoodActivity extends AppCompatActivity {
             String formatted = String.format(java.util.Locale.getDefault(),
                     "%04d-%02d-%02d", year, month + 1, dayOfMonth);
             binding.etExpiryDate.setText(formatted);
+            ValidationUtils.clear(binding.etExpiryDate);
         },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -219,6 +228,34 @@ public class PostFoodActivity extends AppCompatActivity {
         // Food can't expire in the past.
         dialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
         dialog.show();
+    }
+
+    private void showPickupWindowPicker() {
+        int initialStart = pickupStartMin >= 0 ? pickupStartMin : TimeUtils.nowMinuteOfDay();
+        TimePickerDialog startDialog = new TimePickerDialog(this, (view, hour, minute) -> {
+            int start = hour * 60 + minute;
+            int initialEnd = pickupEndMin > start ? pickupEndMin : Math.min(start + 120, 23 * 60 + 59);
+            TimePickerDialog endDialog = new TimePickerDialog(this, (endView, endHour, endMinute) -> {
+                pickupStartMin = start;
+                pickupEndMin = endHour * 60 + endMinute;
+                binding.etPickupWindow.setText(TimeUtils.formatWindow(pickupStartMin, pickupEndMin));
+                new ValidationUtils.Form().check(binding.etPickupWindow, pickupWindowError());
+            }, initialEnd / 60, initialEnd % 60, false);
+            endDialog.setTitle("Pickup ends at");
+            endDialog.show();
+        }, initialStart / 60, initialStart % 60, false);
+        startDialog.setTitle("Pickup starts at");
+        startDialog.show();
+    }
+
+    private String pickupWindowError() {
+        if (pickupStartMin < 0 || pickupEndMin < 0) return "Please select the pickup time window";
+        if (pickupEndMin <= pickupStartMin) return "Pickup end time must be after the start time";
+        if (selectedExpiresAtMillis > 0 && android.text.format.DateUtils.isToday(selectedExpiresAtMillis)
+                && pickupEndMin <= TimeUtils.nowMinuteOfDay()) {
+            return "This pickup time has already passed today — please choose a later time";
+        }
+        return null;
     }
 
     private void attemptSubmit() {
@@ -234,10 +271,17 @@ public class PostFoodActivity extends AppCompatActivity {
         String pickupLocation = binding.etPickupLocation.getText().toString().trim();
         String pickupWindow = binding.etPickupWindow.getText().toString().trim();
 
-        if (TextUtils.isEmpty(donorName) || TextUtils.isEmpty(foodName) ||
-                TextUtils.isEmpty(quantity) || selectedExpiresAtMillis < 0 ||
-                TextUtils.isEmpty(pickupLocation) || TextUtils.isEmpty(pickupWindow)) {
-            Toast.makeText(this, "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+        ValidationUtils.Form form = new ValidationUtils.Form()
+                .check(binding.etDonorName, ValidationUtils.orgName("Name", donorName))
+                .check(binding.etFoodTitle, ValidationUtils.foodName(foodName))
+                .check(binding.etQuantity, ValidationUtils.quantity(quantity))
+                .check(binding.etDescription, ValidationUtils.optionalText("Description", description,
+                        ValidationUtils.DESCRIPTION_MAX))
+                .check(binding.etExpiryDate, selectedExpiresAtMillis < 0 ? "Please select the expiry date" : null)
+                .check(binding.etPickupLocation, ValidationUtils.address("Pickup location", pickupLocation))
+                .check(binding.etPickupWindow, pickupWindowError());
+        if (!form.isValid()) {
+            Toast.makeText(this, "Please correct the highlighted fields.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -259,8 +303,7 @@ public class PostFoodActivity extends AppCompatActivity {
                         runOnUiThread(() -> {
                             if (result.isSuspicious()) {
                                 setLoading(false);
-                                showSuspiciousPhotoDialog(result, photoBase64, donorName, foodName,
-                                        quantity, description, expiresAt, pickupLocation, pickupWindow, lat, lng);
+                                showPolicyViolationDialog(result);
                             } else {
                                 uploadPost(photoBase64, donorName, foodName, quantity, description,
                                         expiresAt, pickupLocation, pickupWindow, lat, lng);
@@ -300,50 +343,30 @@ public class PostFoodActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showSuspiciousPhotoDialog(AiImageChecker.Result result, String photoBase64,
-                                            String donorName, String foodName, String quantity,
-                                            String description, long expiresAt, String pickupLocation,
-                                            String pickupWindow, double lat, double lng) {
+    private void showPolicyViolationDialog(AiImageChecker.Result result) {
+        if (isFinishing()) return;
         StringBuilder message = new StringBuilder();
+        message.append("This photo violates our food posting policy, so it can't be posted.\n\n");
         if (result.isScreenshot) {
-            message.append("This looks like a screenshot rather than a live camera photo.\n");
+            message.append("• It looks like a screenshot, not a live camera photo.\n");
         }
         if (result.isAiGenerated) {
-            message.append("This image looks AI-generated rather than a real photo.\n");
+            message.append("• It looks AI-generated or edited, not a real photo.\n");
         }
         if (!result.isRealFood) {
-            message.append("This doesn't look like a photo of real food.\n");
+            message.append("• It doesn't look like a photo of real food.\n");
         }
         if (!TextUtils.isEmpty(result.reason)) {
-            message.append("\n").append(result.reason);
+            message.append("\n").append(result.reason).append("\n");
         }
-        message.append("\n\nOnly genuine, live photos of real food are allowed.");
+        message.append("\nPlease retake a clear, live photo of the actual food.");
 
         new AlertDialog.Builder(this)
-                .setTitle("Photo flagged")
+                .setTitle("Policy Violation")
                 .setMessage(message.toString())
                 .setCancelable(false)
-                .setNegativeButton("Retake Photo", (dialog, which) -> resetToCameraView())
-                .setPositiveButton("Post Anyway", (dialog, which) -> confirmPolicyOverride(result, photoBase64,
-                        donorName, foodName, quantity, description, expiresAt, pickupLocation, pickupWindow, lat, lng))
-                .show();
-    }
-    private void confirmPolicyOverride(AiImageChecker.Result result, String photoBase64,
-                                        String donorName, String foodName, String quantity,
-                                        String description, long expiresAt, String pickupLocation,
-                                        String pickupWindow, double lat, double lng) {
-        new AlertDialog.Builder(this)
-                .setTitle("Confirm Policy Override")
-                .setMessage("Posting this photo despite the AI's warning will be reported to the admin "
-                        + "for review, and may affect your account status. Do you want to continue?")
-                .setCancelable(false)
-                .setNegativeButton("Cancel", (dialog, which) -> { /* stay on the form, do nothing */ })
-                .setPositiveButton("Yes, Post Anyway", (dialog, which) -> {
-                    foodPostRepository.reportPolicyViolation(donorName, foodName, result.reason,
-                            result.isRealFood, result.isAiGenerated, result.isScreenshot);
-                    uploadPost(photoBase64, donorName, foodName, quantity, description,
-                            expiresAt, pickupLocation, pickupWindow, lat, lng);
-                })
+                .setPositiveButton("Retake Photo", (dialog, which) -> resetToCameraView())
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 

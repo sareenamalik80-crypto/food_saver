@@ -86,7 +86,7 @@ public class FoodPostAdapter extends RecyclerView.Adapter<FoodPostAdapter.FoodPo
                 binding.tvStatus.setText("Completed");
                 binding.tvStatus.setTextColor(ctx.getColor(com.example.food_saver.R.color.success_green));
             } else {
-                binding.tvStatus.setText(capitalize(post.getStatus()));
+                binding.tvStatus.setText(statusLabel(post.getStatus()));
                 binding.tvStatus.setTextColor(ctx.getColor(com.example.food_saver.R.color.brown_primary));
             }
             binding.tvEditHint.setVisibility(post.isEditable() ? android.view.View.VISIBLE : android.view.View.GONE);
@@ -109,6 +109,12 @@ public class FoodPostAdapter extends RecyclerView.Adapter<FoodPostAdapter.FoodPo
             binding.getRoot().setOnClickListener(v -> {
                 if (listener != null) listener.onPostClick(post);
             });
+        }
+
+        private String statusLabel(String status) {
+            if ("collected".equals(status)) return "Handed Over";
+            if ("handedOver".equals(status)) return "Completed";
+            return capitalize(status);
         }
 
         private String capitalize(String s) {

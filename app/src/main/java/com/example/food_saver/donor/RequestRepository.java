@@ -88,8 +88,11 @@ public class RequestRepository {
                 if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
                     FoodPost post = task.getResult().toObject(FoodPost.class);
                     if (post != null) {
+                        post.setFoodId(task.getResult().getId());
                         requests.get(i).setFoodName(post.getFoodName());
                         requests.get(i).setFoodImageBase64(post.getImageUrl());
+                        requests.get(i).setFoodExpired(post.isExpired());
+                        com.example.food_saver.utils.ExpiryHelper.expireIfNeeded(post);
                     }
                 }
             }
@@ -140,10 +143,33 @@ public class RequestRepository {
 
         firestore.runTransaction(transaction -> {
                     DocumentSnapshot requestSnapshot = transaction.get(requestRef);
-                    Boolean ngoConfirmed = requestSnapshot.getBoolean("ngoConfirmedReceived");
-                    boolean ngoAlreadyConfirmed = ngoConfirmed != null && ngoConfirmed;
+                    DocumentSnapshot postSnapshot = transaction.get(postRef);
+                    String postStatus = postSnapshot.getString("status");
+                    Long expiresAt = postSnapshot.getLong("expiresAt");
+                    if (FoodPost.STATUS_EXPIRED.equals(postStatus)
+                            || (FoodPost.STATUS_APPROVED.equals(postStatus) && expiresAt != null && expiresAt > 0
+                            && System.currentTimeMillis() > expiresAt)) {
+                        throw new RuntimeException("POST_EXPIRED");
+                    }
+                    Boolean alreadyHandedOver = requestSnapshot.getBoolean("donorConfirmedHandover");
+                    if (alreadyHandedOver != null && alreadyHandedOver) {
+                        throw new RuntimeException("ALREADY_HANDED_OVER");
+                    }
+                    String status = requestSnapshot.getString("status");
+                    if (!Request.STATUS_APPROVED.equals(status) && !Request.STATUS_COLLECTED.equals(status)) {
+                        throw new RuntimeException("NOT_APPROVED");
+                    }
+                    String arrivalTime = requestSnapshot.getString("arrivalTime");
+                    if (arrivalTime == null || arrivalTime.isEmpty()) {
+                        throw new RuntimeException("NO_DELIVERY_DETAILS");
+                    }
+                    Long arrivalAt = requestSnapshot.getLong("arrivalAt");
+                    if (arrivalAt != null && arrivalAt > 0 && System.currentTimeMillis() < arrivalAt) {
+                        throw new RuntimeException("TOO_EARLY");
+                    }
 
-                    if (ngoAlreadyConfirmed) {
+                    Boolean ngoConfirmed = requestSnapshot.getBoolean("ngoConfirmedReceived");
+                    if (ngoConfirmed != null && ngoConfirmed) {
                         transaction.update(requestRef,
                                 "donorConfirmedHandover", true,
                                 "status", Request.STATUS_HANDED_OVER);
@@ -152,9 +178,25 @@ public class RequestRepository {
                         transaction.update(requestRef,
                                 "donorConfirmedHandover", true,
                                 "status", Request.STATUS_COLLECTED);
+                        transaction.update(postRef, "status", FoodPost.STATUS_COLLECTED);
                     }
                     return null;
                 }).addOnSuccessListener(unused -> callback.onSuccess())
-                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+                .addOnFailureListener(e -> {
+                    String code = e.getMessage() != null ? e.getMessage() : "";
+                    if (code.contains("POST_EXPIRED")) {
+                        callback.onFailure("This donation has expired, so it can't be handed over.");
+                    } else if (code.contains("NO_DELIVERY_DETAILS")) {
+                        callback.onFailure("The NGO hasn't added the rider details yet.");
+                    } else if (code.contains("TOO_EARLY")) {
+                        callback.onFailure("You can hand over the food only after the rider's arrival time.");
+                    } else if (code.contains("ALREADY_HANDED_OVER")) {
+                        callback.onFailure("You have already handed over this food.");
+                    } else if (code.contains("NOT_APPROVED")) {
+                        callback.onFailure("This request can't be handed over right now.");
+                    } else {
+                        callback.onFailure(e.getMessage());
+                    }
+                });
     }
 }
