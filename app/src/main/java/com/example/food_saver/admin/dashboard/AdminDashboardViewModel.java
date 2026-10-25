@@ -51,8 +51,6 @@ public class AdminDashboardViewModel extends ViewModel {
         countQuery(donationsRef.whereEqualTo("status", "available"), count ->
                 uiState.setValue(uiState.getValue().withActiveDonations(count, false)));
 
-        countQuery(db.collection("policyViolations").whereEqualTo("reviewed", false), count ->
-                uiState.setValue(uiState.getValue().withPendingViolations(count)));
     }
 
     private interface CountCallback {

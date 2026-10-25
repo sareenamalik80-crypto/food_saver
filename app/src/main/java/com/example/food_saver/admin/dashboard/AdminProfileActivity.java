@@ -1,5 +1,6 @@
 package com.example.food_saver.admin.dashboard;
 
+import com.example.food_saver.utils.ValidationUtils;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -83,6 +84,15 @@ public class AdminProfileActivity extends AppCompatActivity {
         String name = binding.etName.getText() != null ? binding.etName.getText().toString().trim() : "";
         String phone = binding.etPhone.getText() != null ? binding.etPhone.getText().toString().trim() : "";
         String address = binding.etAddress.getText() != null ? binding.etAddress.getText().toString().trim() : "";
+
+        ValidationUtils.Form form = new ValidationUtils.Form()
+                .check(binding.etName, ValidationUtils.personName("Name", name))
+                .check(binding.etPhone, ValidationUtils.phone(phone))
+                .check(binding.etAddress, ValidationUtils.address("Address", address));
+        if (!form.isValid()) {
+            Toast.makeText(this, "Please correct the highlighted fields.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("name", name);

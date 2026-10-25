@@ -75,16 +75,7 @@ public class UserManagementAdapter extends RecyclerView.Adapter<UserManagementAd
         }
 
         void bind(AppUser user, Listener listener) {
-            String displayName = user.getName() != null ? user.getName() : "(no name)";
-            if (user.isFlagged()) {
-                binding.tvName.setText("\uD83D\uDEA9 " + displayName);
-                binding.tvName.setTextColor(
-                        binding.getRoot().getResources().getColor(R.color.error_red));
-            } else {
-                binding.tvName.setText(displayName);
-                binding.tvName.setTextColor(
-                        binding.getRoot().getResources().getColor(R.color.text_dark));
-            }
+            binding.tvName.setText(user.getName() != null ? user.getName() : "(no name)");
             binding.tvEmail.setText(user.getEmail() != null ? user.getEmail() : "");
             binding.tvRole.setText("ngo".equalsIgnoreCase(user.getRole()) ? "NGO" : "Donor");
             binding.tvStatus.setText(user.isSuspended() ? "Suspended" : "Active");

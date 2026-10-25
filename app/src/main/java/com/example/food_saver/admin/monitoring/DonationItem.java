@@ -11,6 +11,7 @@ public class DonationItem {
     private String quantity;
     private String status;
     private Long postedAt;
+    private Long expiresAt;
 
     public DonationItem() {
 
@@ -35,4 +36,16 @@ public class DonationItem {
 
     public Long getPostedAt() { return postedAt; }
     public void setPostedAt(Long postedAt) { this.postedAt = postedAt; }
+
+    public Long getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Long expiresAt) { this.expiresAt = expiresAt; }
+
+    @com.google.firebase.firestore.Exclude
+    public String getEffectiveStatus() {
+        boolean open = "available".equals(status) || "requested".equals(status) || "approved".equals(status);
+        if (open && expiresAt != null && expiresAt > 0 && System.currentTimeMillis() > expiresAt) {
+            return "expired";
+        }
+        return status;
+    }
 }

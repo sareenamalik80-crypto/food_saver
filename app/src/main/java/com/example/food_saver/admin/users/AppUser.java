@@ -8,8 +8,6 @@ public class AppUser {
     private String email;
     private String role;
     private String accountStatus; // "active" or "suspended"
-    private boolean flagged;
-    private long flagCount;
 
     public AppUser() {
     }
@@ -28,12 +26,6 @@ public class AppUser {
 
     public String getAccountStatus() { return accountStatus; }
     public void setAccountStatus(String accountStatus) { this.accountStatus = accountStatus; }
-
-    public boolean isFlagged() { return flagged; }
-    public void setFlagged(boolean flagged) { this.flagged = flagged; }
-
-    public long getFlagCount() { return flagCount; }
-    public void setFlagCount(long flagCount) { this.flagCount = flagCount; }
 
     public boolean isSuspended() {
         return "suspended".equalsIgnoreCase(accountStatus);

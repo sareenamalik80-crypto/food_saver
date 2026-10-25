@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.food_saver.admin.approvals.ApprovalsActivity;
 import com.example.food_saver.admin.monitoring.DonationMonitoringActivity;
 import com.example.food_saver.admin.users.UserManagementActivity;
-import com.example.food_saver.admin.violations.PolicyViolationsActivity;
 import com.example.food_saver.databinding.ActivityAdminDashboardBinding;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,8 +70,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
         binding.cardUserManagement.setOnClickListener(v ->
                 startActivity(new Intent(this, UserManagementActivity.class)));
 
-        binding.cardFlagged.setOnClickListener(v ->
-                startActivity(new Intent(this, PolicyViolationsActivity.class)));
     }
 
     private void observeUiState() {
@@ -85,7 +82,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
             binding.statActiveDonations.tvValue.setText(String.valueOf(state.getActiveDonations()));
 
             binding.tvPendingCount.setText(String.valueOf(state.getPendingApprovals()));
-            binding.tvFlaggedCount.setText(String.valueOf(state.getPendingViolations()));
 
             if (state.getErrorMessage() != null) {
                 Snackbar.make(binding.getRoot(), state.getErrorMessage(), Snackbar.LENGTH_LONG).show();

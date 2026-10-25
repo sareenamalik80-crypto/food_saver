@@ -17,6 +17,7 @@ public class DonationMonitoringAdapter extends RecyclerView.Adapter<DonationMoni
 
     public interface Listener {
         void onRemove(DonationItem item);
+        void onOpen(DonationItem item);
     }
 
     private final List<DonationItem> items = new ArrayList<>();
@@ -78,10 +79,11 @@ public class DonationMonitoringAdapter extends RecyclerView.Adapter<DonationMoni
             binding.tvDonor.setText("By " + (item.getDonorName() != null ? item.getDonorName() : "Unknown donor"));
             binding.tvQuantity.setText(item.getQuantity() != null ? item.getQuantity() : "");
 
-            String status = item.getStatus() != null ? item.getStatus() : "unknown";
-            binding.tvStatus.setText(status);
+            String status = item.getEffectiveStatus() != null ? item.getEffectiveStatus() : "unknown";
+            binding.tvStatus.setText(statusLabel(status));
             switch (status.toLowerCase()) {
                 case "available":
+                case "handedover":
                     binding.tvStatus.setBackgroundResource(R.drawable.bg_badge_success);
                     break;
                 case "expired":
@@ -93,6 +95,20 @@ public class DonationMonitoringAdapter extends RecyclerView.Adapter<DonationMoni
             }
 
             binding.btnRemove.setOnClickListener(v -> listener.onRemove(item));
+            binding.getRoot().setOnClickListener(v -> listener.onOpen(item));
+        }
+
+        private String statusLabel(String status) {
+            switch (status) {
+                case "available": return "Available";
+                case "requested": return "Requested";
+                case "approved": return "Approved";
+                case "collected": return "Handed Over";
+                case "handedOver": return "Completed";
+                case "expired": return "Expired";
+                case "removed": return "Removed";
+                default: return status.isEmpty() ? status : Character.toUpperCase(status.charAt(0)) + status.substring(1);
+            }
         }
     }
 }

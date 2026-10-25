@@ -1,5 +1,6 @@
 package com.example.food_saver.admin.dashboard;
 
+import com.example.food_saver.utils.ValidationUtils;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -50,8 +51,9 @@ public class AdminLoginActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Send Link", (dialog, which) -> {
                     String email = input.getText().toString().trim();
-                    if (TextUtils.isEmpty(email)) {
-                        Toast.makeText(this, "Enter your email first.", Toast.LENGTH_SHORT).show();
+                    String emailError = ValidationUtils.email(email);
+                    if (emailError != null) {
+                        Toast.makeText(this, emailError, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     auth.sendPasswordResetEmail(email)
@@ -78,12 +80,10 @@ public class AdminLoginActivity extends AppCompatActivity {
         String password = binding.etPassword.getText() != null
                 ? binding.etPassword.getText().toString().trim() : "";
 
-        if (TextUtils.isEmpty(email)) {
-            Toast.makeText(this, "Please enter your email.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (TextUtils.isEmpty(password)) {
-            Toast.makeText(this, "Please enter your password.", Toast.LENGTH_SHORT).show();
+        ValidationUtils.Form form = new ValidationUtils.Form()
+                .check(binding.etEmail, ValidationUtils.email(email))
+                .check(binding.etPassword, ValidationUtils.loginPassword(password));
+        if (!form.isValid()) {
             return;
         }
 

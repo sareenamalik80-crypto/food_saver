@@ -112,6 +112,7 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etName"
+                            android:maxLength="50"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPersonName" />
@@ -128,6 +129,7 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPhone"
+                            android:maxLength="13"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="phone" />
@@ -144,6 +146,7 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etAddress"
+                            android:maxLength="200"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPostalAddress" />

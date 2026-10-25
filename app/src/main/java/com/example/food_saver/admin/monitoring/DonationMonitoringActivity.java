@@ -1,6 +1,7 @@
 package com.example.food_saver.admin.monitoring;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -34,7 +35,19 @@ public class DonationMonitoringActivity extends AppCompatActivity {
     }
 
     private void setupList() {
-        adapter = new DonationMonitoringAdapter(item -> confirmRemove(item));
+        adapter = new DonationMonitoringAdapter(new DonationMonitoringAdapter.Listener() {
+            @Override
+            public void onRemove(DonationItem item) {
+                confirmRemove(item);
+            }
+
+            @Override
+            public void onOpen(DonationItem item) {
+                Intent intent = new Intent(DonationMonitoringActivity.this, DonationDetailActivity.class);
+                intent.putExtra(DonationDetailActivity.EXTRA_FOOD_ID, item.getId());
+                startActivity(intent);
+            }
+        });
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.setAdapter(adapter);
     }

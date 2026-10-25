@@ -50,11 +50,11 @@
             android:exported="false" />
 
         <activity
-            android:name=".admin.violations.PolicyViolationsActivity"
+            android:name=".admin.monitoring.DonationMonitoringActivity"
             android:exported="false" />
 
         <activity
-            android:name=".admin.monitoring.DonationMonitoringActivity"
+            android:name=".admin.monitoring.DonationDetailActivity"
             android:exported="false" />
 
         <activity
