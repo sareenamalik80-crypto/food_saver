@@ -1,5 +1,6 @@
 package com.example.food_saver.ngo;
 
+import com.example.food_saver.utils.ValidationUtils;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -76,8 +77,12 @@ public class ProfileActivity extends AppCompatActivity {
         String phone = binding.etPhone.getText().toString().trim();
         String address = binding.etAddress.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name)) {
-            Toast.makeText(this, "Please enter your organization name.", Toast.LENGTH_SHORT).show();
+        ValidationUtils.Form form = new ValidationUtils.Form()
+                .check(binding.etNgoName, ValidationUtils.orgName("Organization name", name))
+                .check(binding.etPhone, ValidationUtils.phone(phone))
+                .check(binding.etAddress, ValidationUtils.address("Address", address));
+        if (!form.isValid()) {
+            Toast.makeText(this, "Please correct the highlighted fields.", Toast.LENGTH_SHORT).show();
             return;
         }
 

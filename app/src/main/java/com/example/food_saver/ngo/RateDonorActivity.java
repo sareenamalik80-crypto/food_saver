@@ -1,5 +1,6 @@
 package com.example.food_saver.ngo;
 
+import com.example.food_saver.utils.ValidationUtils;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -45,6 +46,12 @@ public class RateDonorActivity extends AppCompatActivity {
     private void submitRating() {
         float stars = binding.ratingBar.getRating();
         String comment = binding.etComment.getText().toString().trim();
+
+        String commentError = ValidationUtils.optionalText("Comment", comment, ValidationUtils.COMMENT_MAX);
+        if (commentError != null) {
+            ValidationUtils.show(binding.etComment, commentError);
+            return;
+        }
 
         if (stars == 0f) {
             Toast.makeText(this, "Please select at least 1 star", Toast.LENGTH_SHORT).show();
